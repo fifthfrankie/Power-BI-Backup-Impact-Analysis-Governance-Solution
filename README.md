@@ -4,9 +4,8 @@ To use this script:
 1. Install latest Tabular Editor 2 (https://github.com/TabularEditor/TabularEditor/releases)
 2. Create C:/Power BI Backups folder
 3. Place Config folder from Repo into C:/Power BI Backups
-4. Open Powershell, copy text from Final PS Script and paste. No Admin Access is required and the script will check and install any modules required (at the user level, not admin).
-5. Sign into Power BI via Pop-up.
-6. Wait for script to complete. If the script goes beyond 45 minutes (dependent on the number of workspaces, models, and reports), a new sign-in will pop up to avoid an expired token. 
+4. Run Final PS Script wihtin PowerShell
+5. Sign into Power BI when pop-up appears
 7. Open Power BI Governance Model.pbit and the model will refresh with the new data. Save as PBIX
 
 
