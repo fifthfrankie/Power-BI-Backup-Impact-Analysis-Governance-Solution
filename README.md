@@ -12,7 +12,7 @@ To use this script:
 5. Once complete, open Power BI Governance Model.pbit and the model will refresh with your data. All relationships, Visuals, and Measures are set up. 
 
 
-* If any modules are required, PowerShell will request to install (user level, no admin access required) *
+** If any modules are required, PowerShell will request to install (user level, no admin access required) **
 
 
 ## Features
