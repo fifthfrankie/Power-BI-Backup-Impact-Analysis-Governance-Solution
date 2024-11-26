@@ -1,3 +1,5 @@
+## This is designed to be ran by anyone who uses Power BI and will work on any computer, no matter the permissions. Everything within the script is limited to your access within the Power BI environment ('My Workspace') is not included. All computer requirements are at the user level and does not require admin privileges. 
+
 ## Getting Started
 
 To use this script:
@@ -10,9 +12,6 @@ To use this script:
 7. Open Power BI Governance Model.pbit and the model will refresh with the new data. Save as PBIX
 8. Enjoy having an all-in-one solution for understanding everyt
 
-
-This is designed to be ran by anyone who uses Power BI and will work on any computer, no matter the permissions. 
-Everything within the script is limited to your access within the Power BI environment ('My Workspace') is not included. All computer requirements are at the user level and does not require admin privileges. 
 
 
 ## Features
