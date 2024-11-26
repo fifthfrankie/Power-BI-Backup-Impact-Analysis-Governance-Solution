@@ -4,7 +4,7 @@
 
 ## Getting Started
 
-To use this script:
+### Instructions:
 1. Install latest Tabular Editor 2 (https://github.com/TabularEditor/TabularEditor/releases)
 2. Create C:/Power BI Backups folder
 3. Place Config folder and the contents from Repo into C:/Power BI Backups
