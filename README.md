@@ -8,8 +8,8 @@ To use this script:
 1. Install latest Tabular Editor 2 (https://github.com/TabularEditor/TabularEditor/releases)
 2. Create C:/Power BI Backups folder
 3. Place Config folder and the contents from Repo into C:/Power BI Backups
-4. Run Final PS Script wihtin PowerShell (either via copy/paste or renaming format to .ps1 and executing)
-5. Once complete, open Power BI Governance Model.pbit and the model will refresh with your data. All relationships, Visuals, and Measures are set up. 
+4. Run 'Final PS Script' within PowerShell (either via copy/paste or renaming format to .ps1 and executing)
+5. Once complete, open 'Power BI Governance Model.pbit' and the model will refresh with your data. All relationships, Visuals, and Measures are set up. Save as PBIX.
 
 
 ** If any modules are required, PowerShell will request to install (user level, no admin access required) **
