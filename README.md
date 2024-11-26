@@ -1,6 +1,6 @@
 ## This all-in-one solution is designed to be ran by anyone who uses Power BI and will work on any computer, no matter the permissions. 
-### 1. Everything within the script is limited to your access within the Power BI environment ('My Workspace') is not included. 
-### 2. All computer requirements are at the user level and do not require admin privileges. 
+- Everything within the script is limited to your access within the Power BI environment ('My Workspace') is not included. 
+- All computer requirements are at the user level and do not require admin privileges. 
 
 ## Getting Started
 
