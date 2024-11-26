@@ -24,7 +24,7 @@ To use this script:
 - Backs up reports from Power BI workspaces, cleaning report names and determining file types (`.pbix` or `.rdl`) for export.
 - Extracts backed-up reports to generate `.bim` files using `pbi-tools`, ensuring proper model serialization.
 
-### 4. Visual Object Layer (VOL) Processing
+### 4. Visual Object Layer (VOL) Processing (credit to m-kovalsky for initial work on this)
 - Executes a predefined Tabular Editor script to extract Visual Object Layers (VOL) from reports.
 - Consolidates VOL extraction results into an Excel workbook for further analysis.
 
