@@ -27,13 +27,16 @@
 ### 2. Model Backup and Metadata Extract
 - Saves exported models in a structured folder hierarchy based on workspace and dataset names.
 - Leverages Tabular Editor 2 and C# to extract the metadata and output within an Excel File.
+- All backups are saved with the following format: Workspace Name ~ Model Name.
 - You must have edit rights on the related model. Works with all Pro, Premium Capacity, Fabric Capacity workspaces. Both XMLA and non-XMLA models. 'My Workspace' not included.
 <img width="695" alt="image" src="https://github.com/user-attachments/assets/c3e021b8-6dfe-40c9-bfa5-b9d4471a8fa3">
 
 
 ### 3. Report Backup and Metadata Extract
-- Backs up reports from Power BI workspaces, cleaning report names and determining file types (`.pbix` or `.rdl`) for export.
+- Backs up Power BI and Paginated Reports from Power BI workspaces, cleaning report names and determining file types (`.pbix` or `.rdl`) for export.
 - Leverages Tabular Editor 2 and C# to extract the Visual Object Layer metadata and output within an Excel File (credit to @m-kovalsky for initial work on this)
+- Paginated Reports are only backed up (no metadata extraction).
+- All backups are saved with the following format: Workspace Name ~ Report Name.
 - You must have edit rights on the related report. Works with all Pro, Premium Capacity, Fabric Capacity workspaces. 'My Workspace' not included.
 - <img width="554" alt="image" src="https://github.com/user-attachments/assets/cf88aac7-6f32-445a-96c7-6bc36fcab9aa">
 
@@ -41,6 +44,7 @@
 ### 4. Dataflow Backup and Metadata Extract
 - Extracts dataflows from Power BI workspaces, formatting and organizing their contents, including query details.
 - Leverages PowerShell to parse and extract the metadata and output within an Excel File.
+- All backups are saved with the following format: Workspace Name ~ Dataflow Name.
 - Must have edit rights on the related dataflow. 'Ownership' of the Dataflow is not required. Works with all Pro, Premium Capacity, Fabric Capacity workspaces. 'My Workspace' not included.
 - <img width="542" alt="image" src="https://github.com/user-attachments/assets/67e83016-4bc7-4cf5-8d94-1a9779aad6d8">
 
