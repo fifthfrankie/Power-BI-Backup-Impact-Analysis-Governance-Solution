@@ -33,9 +33,11 @@
 - Extracts dataflows from Power BI workspaces, formatting and organizing their contents, including query details.
 - Leverages PowerShell to parse and extract the metadata and output within an Excel File.
   
-### 5. Power BI Governance Model (public example output: https://app.powerbi.com/view?r=eyJrIjoiYzkzNWZlYWItMDc4OS00YTE2LTg0YTYtZTc3MDdlYzUwMzUxIiwidCI6ImUyY2Y4N2QyLTYxMjktNGExYS1iZTczLTEzOGQyY2Y5OGJlMiJ9)
+### 5. Power BI Governance Model
 - Combines extracts into a Semantic Model to allow easy exploring, impact analysis, and governance of all Power BI Reports, Models, and Dataflows across all Workspaces
+- Public example (limited due to no filter pane): https://app.powerbi.com/view?r=eyJrIjoiYzkzNWZlYWItMDc4OS00YTE2LTg0YTYtZTc3MDdlYzUwMzUxIiwidCI6ImUyY2Y4N2QyLTYxMjktNGExYS1iZTczLTEzOGQyY2Y5OGJlMiJ9)
 
 <img width="1235" alt="image" src="https://github.com/user-attachments/assets/33101f84-b567-4a45-9729-09303eeb50fb">
+<img width="1264" alt="image" src="https://github.com/user-attachments/assets/17dc2dc2-fb2b-43b6-8b4b-a869f31e3187">
 <img width="1221" alt="image" src="https://github.com/user-attachments/assets/e120c1bb-b52a-4197-aeb3-2a6ddbb67a9f">
 <img width="1241" alt="image" src="https://github.com/user-attachments/assets/9d814034-494d-478b-b231-f759d7eebeab">
