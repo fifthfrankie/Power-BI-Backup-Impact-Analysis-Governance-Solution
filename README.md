@@ -24,14 +24,22 @@
 ### 2. Model Backup and Metadata Extract
 - Saves exported models in a structured folder hierarchy based on workspace and dataset names.
 - Leverages Tabular Editor 2 and C# to extract the metadata and output within an Excel File.
+<img width="695" alt="image" src="https://github.com/user-attachments/assets/c3e021b8-6dfe-40c9-bfa5-b9d4471a8fa3">
+
 
 ### 3. Report Backup and Metadata Extract
 - Backs up reports from Power BI workspaces, cleaning report names and determining file types (`.pbix` or `.rdl`) for export.
 - Leverages Tabular Editor 2 and C# to extract the Visual Object Layer metadata and output within an Excel File (credit to m-kovalsky for initial work on this)
 
+- <img width="554" alt="image" src="https://github.com/user-attachments/assets/cf88aac7-6f32-445a-96c7-6bc36fcab9aa">
+
+
 ### 4. Dataflow Backup and Metadata Extract
 - Extracts dataflows from Power BI workspaces, formatting and organizing their contents, including query details.
 - Leverages PowerShell to parse and extract the metadata and output within an Excel File.
+
+- <img width="542" alt="image" src="https://github.com/user-attachments/assets/67e83016-4bc7-4cf5-8d94-1a9779aad6d8">
+
   
 ### 5. Power BI Governance Model
 - Combines extracts into a Semantic Model to allow easy exploring, impact analysis, and governance of all Power BI Reports, Models, and Dataflows across all Workspaces
@@ -44,3 +52,4 @@
 <img width="1259" alt="image" src="https://github.com/user-attachments/assets/87d23e7e-5f9b-4883-8c58-f102033be5e0">
 <img width="1221" alt="image" src="https://github.com/user-attachments/assets/e120c1bb-b52a-4197-aeb3-2a6ddbb67a9f">
 <img width="1241" alt="image" src="https://github.com/user-attachments/assets/9d814034-494d-478b-b231-f759d7eebeab">
+![Uploading image.png…]()
