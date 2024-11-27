@@ -1,6 +1,9 @@
 ## This all-in-one solution is designed to be ran by anyone who uses Power BI and will work on any computer, no matter the permissions. 
 - Everything within the script is limited to your access within the Power BI environment ('My Workspace') is not included. 
-- All computer requirements are at the user level and do not require admin privileges. 
+- All computer requirements are at the user level and do not require admin privileges.
+
+- <img width="1255" alt="image" src="https://github.com/user-attachments/assets/515ce3e5-ec56-467a-a421-9da05889eaa5">
+
 
 ## Getting Started
 
@@ -29,7 +32,7 @@
 
 ### 3. Report Backup and Metadata Extract
 - Backs up reports from Power BI workspaces, cleaning report names and determining file types (`.pbix` or `.rdl`) for export.
-- Leverages Tabular Editor 2 and C# to extract the Visual Object Layer metadata and output within an Excel File (credit to m-kovalsky for initial work on this)
+- Leverages Tabular Editor 2 and C# to extract the Visual Object Layer metadata and output within an Excel File (credit to @m-kovalsky for initial work on this)
 
 - <img width="554" alt="image" src="https://github.com/user-attachments/assets/cf88aac7-6f32-445a-96c7-6bc36fcab9aa">
 
