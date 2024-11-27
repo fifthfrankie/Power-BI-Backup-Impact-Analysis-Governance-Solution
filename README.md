@@ -21,7 +21,7 @@
 ### 1. Workspace and Metadata Extraction
 - Retrieves information about Power BI workspaces, datasets, data sources, reports, report pages, and apps.
 - Exports the extracted metadata into a structured Excel workbook with separate worksheets for each entity.
-- Read-Only Required
+- Read-only acess required within workspaces.
 - <img width="1255" alt="image" src="https://github.com/user-attachments/assets/515ce3e5-ec56-467a-a421-9da05889eaa5">
 
 ### 2. Model Backup and Metadata Extract
