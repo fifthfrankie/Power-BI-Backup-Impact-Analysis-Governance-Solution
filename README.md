@@ -2,8 +2,6 @@
 - Everything within the script is limited to your access within the Power BI environment ('My Workspace') is not included. 
 - All computer requirements are at the user level and do not require admin privileges.
 
-- <img width="1255" alt="image" src="https://github.com/user-attachments/assets/515ce3e5-ec56-467a-a421-9da05889eaa5">
-
 
 ## Getting Started
 
@@ -23,6 +21,7 @@
 ### 1. Workspace and Metadata Extraction
 - Retrieves information about Power BI workspaces, datasets, data sources, reports, report pages, and apps.
 - Exports the extracted metadata into a structured Excel workbook with separate worksheets for each entity.
+- <img width="1255" alt="image" src="https://github.com/user-attachments/assets/515ce3e5-ec56-467a-a421-9da05889eaa5">
 
 ### 2. Model Backup and Metadata Extract
 - Saves exported models in a structured folder hierarchy based on workspace and dataset names.
@@ -33,14 +32,12 @@
 ### 3. Report Backup and Metadata Extract
 - Backs up reports from Power BI workspaces, cleaning report names and determining file types (`.pbix` or `.rdl`) for export.
 - Leverages Tabular Editor 2 and C# to extract the Visual Object Layer metadata and output within an Excel File (credit to @m-kovalsky for initial work on this)
-
 - <img width="554" alt="image" src="https://github.com/user-attachments/assets/cf88aac7-6f32-445a-96c7-6bc36fcab9aa">
 
 
 ### 4. Dataflow Backup and Metadata Extract
 - Extracts dataflows from Power BI workspaces, formatting and organizing their contents, including query details.
 - Leverages PowerShell to parse and extract the metadata and output within an Excel File.
-
 - <img width="542" alt="image" src="https://github.com/user-attachments/assets/67e83016-4bc7-4cf5-8d94-1a9779aad6d8">
 
   
