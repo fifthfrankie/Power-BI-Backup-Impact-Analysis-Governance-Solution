@@ -514,7 +514,7 @@ foreach ($workspace in $workspacesInfo) {
         Export-PowerBIReport -Id $report.Id -OutFile $filepath
 
         # Check if .bim files exist
-        $bimFilesInFolder = Get-ChildItem -Path $folderPath -Filter *.bim
+        $bimFilesInFolder = Get-ChildItem -Path $folderPath -Filter "$cleanWorkspaceName ~ $cleanReportName.bim"
         if ($bimFilesInFolder.Count -eq 0) {
             # Extract the pbix file
             Write-Output "Extracting $cleanWorkspaceName ~ $cleanReportName"
