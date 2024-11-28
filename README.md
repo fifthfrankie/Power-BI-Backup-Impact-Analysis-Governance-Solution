@@ -2,7 +2,7 @@
 - Everything within the script is limited to your access within the Power BI environment.
 - All computer requirements are at the user level and do not require admin privileges.
 
-# Power BI Governance & Impact Analysis Tool
+# Power BI Governance & Impact Analysis Solution
 
 ## What It Does
 This tool provides a quick and automated way to identify where and how specific fields, measures, and tables are used across Power BI reports in all workspaces by analyzing the visual object layer. It also breaks down the details of your models, reports, and dataflows for easy review, giving you an all-in-one **Power BI Governance** solution.
