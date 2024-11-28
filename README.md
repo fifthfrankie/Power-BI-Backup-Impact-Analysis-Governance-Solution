@@ -2,7 +2,19 @@
 - Everything within the script is limited to your access within the Power BI environment.
 - All computer requirements are at the user level and do not require admin privileges.
 
+# Power BI Governance & Impact Analysis Tool
 
+## What It Does
+This tool provides a quick and automated way to identify where and how specific fields, measures, and tables are used across Power BI reports in all workspaces by analyzing the visual object layer. It also breaks down the details of your models, reports, and dataflows for easy review, giving you an all-in-one **Power BI Governance** solution.
+
+### Key Features:
+- **Impact Analysis**: Fully understand the downstream impact of data model changes, ensuring you don’t accidentally break visuals or dashboards—especially when reports connected to a model span multiple workspaces.
+- **Comprehensive Environment Overview**: Gain a clear, detailed view of your entire Power BI environment, including the detailed views of your models, reports, and dataflows and their dependencies. 
+- **Backup Solution**: Automatically backs up every model, report, and dataflow for safekeeping.
+- **User-Friendly Output**: Results are presented in a Power BI model, making them easy to explore, analyze, and share with your team.
+
+ 
+ 
 ## Getting Started
 
 ### Instructions:
