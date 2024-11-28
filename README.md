@@ -26,6 +26,7 @@ This provides a quick and automated way to identify where and how specific field
 
 
 ** If any modules are required, PowerShell will request to install (user level, no admin access required) **
+** if tabular editor is not installed, the metadata and model wont work - but the report, model, and dataflow backup feature should still work ** 
 
 
 ## Features
