@@ -66,7 +66,7 @@ This provides a quick and automated way to identify where and how specific field
 ### 5. Power BI Governance Model
 - Combines extracts into a Semantic Model to allow easy exploring, impact analysis, and governance of all Power BI Reports, Models, and Dataflows across all Workspaces
 - Works for anyone who runs the script and has at least 1 model and report. Dataflow not required.
-- Public example (limited due to no filter pane): https://app.powerbi.com/view?r=eyJrIjoiYzkzNWZlYWItMDc4OS00YTE2LTg0YTYtZTc3MDdlYzUwMzUxIiwidCI6ImUyY2Y4N2QyLTYxMjktNGExYS1iZTczLTEzOGQyY2Y5OGJlMiJ9)
+- Public example (limited due to no filter pane): https://app.powerbi.com/view?r=eyJrIjoiN2Y3OTZlOTEtOWQ4Yi00M2UyLTk3MGQtMDA4OTRjY2M4ZGJlIiwidCI6ImUyY2Y4N2QyLTYxMjktNGExYS1iZTczLTEzOGQyY2Y5OGJlMiJ9)
 
 ..
 ..
