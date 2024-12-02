@@ -27,7 +27,7 @@ This provides a quick and automated way to identify where and how specific field
 
 - ** If any modules are required, PowerShell will request to install (user level, no admin access required) **
 
-- ** If Tabular Editor is not installed (or can't be), the metadata extraction and final model won't work - BUT the report, model, and dataflow backup feature should still work ** 
+- ** If Tabular Editor is not installed (or can't be), only the Model and Report metadata extraction and final Governance Model won't work - BUT the workspace metadata extraction, all backups, and the dataflow metadata extraction will still work **
 
 
 ## Features
