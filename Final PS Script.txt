@@ -513,9 +513,9 @@ foreach ($workspace in $workspacesInfo) {
         Write-Output "Exporting $cleanWorkspaceName ~ $cleanReportName"
         Export-PowerBIReport -Id $report.Id -OutFile $filepath
 
-        # Check if .bim files exist
-        $bimFilesInFolder = Get-ChildItem -Path $folderPath -Filter "$cleanWorkspaceName ~ $cleanReportName.bim"
-        if ($bimFilesInFolder.Count -eq 0) {
+        # Only process model extraction if the Workspace is not Premium or Fabric Capacity (i.e. only Pro Workspaces)
+
+        if ($workspace.WorkspaceIsOnDedicatedCapacity -eq $false) {
             # Extract the pbix file
             Write-Output "Extracting $cleanWorkspaceName ~ $cleanReportName"
             pbi-tools extract $filepath -extractFolder $extractFolder -modelSerialization Raw
@@ -560,7 +560,6 @@ foreach ($workspace in $workspacesInfo) {
             # Cleanup: Unmap the drive
             subst $driveLetter /D
         } else {
-            Write-Output ".bim files already exist in $folderPath. Skipping extraction and .bim file generation for $cleanWorkspaceName ~ $cleanReportName"
         }
     }
 
