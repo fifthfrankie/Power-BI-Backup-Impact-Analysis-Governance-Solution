@@ -955,7 +955,7 @@ foreach ($workspace in $workspacesInfo) {
             
             # Extract the data from the JSON response without writing intermediate files
             $startMarker = '"document\":'
-            $endMarker = '\\\";\\r\\n\'
+            $endMarker = '\\r\\n\"'
             $startIndex = $jsonString.IndexOf($startMarker) + $startMarker.Length
             $endIndex = $jsonString.IndexOf($endMarker, $startIndex)
             
@@ -963,7 +963,7 @@ foreach ($workspace in $workspacesInfo) {
             if ($startIndex -ge 0 -and $endIndex -ge 0 -and $endIndex -gt $startIndex) {
                 $documentContent = $jsonString.Substring($startIndex, $endIndex - $startIndex)
             } else {
-                Write-Host "Invalid substring parameters for dataflow '$dataflowName' in workspace '$workspaceName'."
+                Write-Host "Invalid Start/End mark for dataflow '$dataflowName' in workspace '$workspaceName'."
                 continue
             }
 
