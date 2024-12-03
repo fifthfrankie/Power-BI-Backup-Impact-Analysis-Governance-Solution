@@ -958,6 +958,16 @@ foreach ($workspace in $workspacesInfo) {
             $endMarker = '\\r\\n\"'
             $startIndex = $jsonString.IndexOf($startMarker) + $startMarker.Length
             $endIndex = $jsonString.IndexOf($endMarker, $startIndex)
+	    $fallbackEndMarker = '"connectionOverrides\"'
+
+		# Extract start and end indices
+		$startIndex = $jsonString.IndexOf($startMarker) + $startMarker.Length
+		$endIndex = $jsonString.IndexOf($endMarker, $startIndex)
+
+		# Check if $endMarker is valid; if not, look for fallback marker
+		if ($endIndex -lt 0) {
+		    $endIndex = $jsonString.IndexOf($fallbackEndMarker, $startIndex)
+		}
             
             # Check if the startIndex and endIndex are valid
             if ($startIndex -ge 0 -and $endIndex -ge 0 -and $endIndex -gt $startIndex) {
@@ -1076,7 +1086,7 @@ foreach ($workspace in $workspacesInfo) {
             }
         }
     } else {
-        Write-Host "No dataflows found in workspace '$workspaceName' or an error occurred."
+        Write-Host "No dataflows found in workspace '$workspaceName'."
     }
 }
 
