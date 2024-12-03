@@ -91,7 +91,7 @@ function Start-TokenRefreshJob {
             Set-Content -Path $env:TEMP\PowerBI_AccessToken.txt -Value $global:accessToken
         }
         while ($true) {
-            Start-Sleep -Seconds 2640  # Sleep for 44 minutes
+            Start-Sleep -Seconds 3300  # Sleep for 55 minutes
             Connect-PowerBI
         }
     }
