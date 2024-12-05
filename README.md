@@ -33,10 +33,11 @@ This provides a quick and automated way to identify where and how specific field
 ## Features
 
 ### 1. Workspace and Metadata Extraction
-- Retrieves information about Power BI workspaces, datasets, data sources, reports, report pages, and apps.
+- Leverages Power BI REST API to gather information about Power BI workspaces, datasets, data sources, reports, report pages, and apps.
 - Exports the extracted metadata into a structured Excel workbook with separate worksheets for each entity.
-- Read-only acess required within workspaces. 'My Workspace' not included.
+- You must have at least read acess within workspaces. 'My Workspace' not included.
 - <img width="1255" alt="image" src="https://github.com/user-attachments/assets/515ce3e5-ec56-467a-a421-9da05889eaa5">
+
 
 ### 2. Model Backup and Metadata Extract
 - Saves exported models in a structured folder hierarchy based on workspace and dataset names.
@@ -68,6 +69,9 @@ This provides a quick and automated way to identify where and how specific field
 - Works for anyone who runs the script and has at least 1 model and report. Dataflow not required.
 - Public example (limited due to no filter pane): https://app.powerbi.com/view?r=eyJrIjoiN2Y3OTZlOTEtOWQ4Yi00M2UyLTk3MGQtMDA4OTRjY2M4ZGJlIiwidCI6ImUyY2Y4N2QyLTYxMjktNGExYS1iZTczLTEzOGQyY2Y5OGJlMiJ9)
 
+## Special Notes
+- The script has a built-in timer to ensure the API bearer token does not expire. It is defaulted to require logging in every 55 minutes. This is only applicable if you have a large number of reports and models (150+)
+- This defaults to looping across all workspaces. If you only want to run this for a specific workspace, you can enter a workspace ID within the quotation marks in $reportSpecificWorkspaceId and/or $modelSpecificWorkspaceId (these are in the first 20 lines of the script)
 ..
 ..
 
