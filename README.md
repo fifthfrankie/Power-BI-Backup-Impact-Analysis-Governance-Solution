@@ -72,6 +72,8 @@ This provides a quick and automated way to identify where and how specific field
 ## Special Notes
 - The script has a built-in timer to ensure the API bearer token does not expire. It is defaulted to require logging in every 55 minutes. This is only applicable if you have a large number of reports and models (150+)
 - This defaults to looping across all workspaces. If you only want to run this for a specific workspace, you can enter a workspace ID within the quotation marks in $reportSpecificWorkspaceId and/or $modelSpecificWorkspaceId (these are in the first 20 lines of the script)
+
+## Screenshots of Final Output
 ..
 ..
 
