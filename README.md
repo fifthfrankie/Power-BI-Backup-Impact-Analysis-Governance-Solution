@@ -27,7 +27,9 @@ This provides a quick and automated way to identify where and how specific field
 
 - ** If any modules are required, PowerShell will request to install (user level, no admin access required) **
 
-- ** If Tabular Editor is not installed (or can't be), the final Governance model and report/model metadata extraction won't work - BUT the workspace metadata extraction, all backups, and the dataflow metadata extraction will still work **
+- ** If Tabular Editor 2 is not installed (or can't be), the final Governance model and report/model metadata extraction won't work - BUT the workspace metadata extraction, all backups, and the dataflow metadata extraction will still work **
+
+- ** For users of the commercial/enterprise Tabular Editor 3, Tabular Editor 2 is still required. TE3 does not have a command line interface feature **
 
 
 ## Features
@@ -43,7 +45,7 @@ This provides a quick and automated way to identify where and how specific field
 - Saves exported models in a structured folder hierarchy based on workspace and dataset names.
 - Leverages Tabular Editor 2 and C# to extract the metadata and output within an Excel File.
 - All backups are saved with the following format: Workspace Name ~ Model Name.
-- You must have edit rights on the related model. Works with all Pro, Premium Capacity, Fabric Capacity workspaces. Both XMLA and non-XMLA models. 'My Workspace' not included.
+- You must have edit rights on the related model. Works with all Pro, Premium-Per-User, Premium, and Fabric Capacity workspaces. Both XMLA and non-XMLA models. 'My Workspace' not included.
 <img width="695" alt="image" src="https://github.com/user-attachments/assets/c3e021b8-6dfe-40c9-bfa5-b9d4471a8fa3">
 
 
@@ -52,7 +54,7 @@ This provides a quick and automated way to identify where and how specific field
 - Leverages Tabular Editor 2 and C# to extract the Visual Object Layer metadata and output within an Excel File (credit to @m-kovalsky for initial work on this)
 - Paginated Reports are only backed up (no metadata extraction).
 - All backups are saved with the following format: Workspace Name ~ Report Name.
-- You must have edit rights on the related report. Works with all Pro, Premium Capacity, Fabric Capacity workspaces. 'My Workspace' not included.
+- You must have edit rights on the related report. Works with all Pro, Premium-Per-User, Premium, and Fabric Capacity workspaces. 'My Workspace' not included.
 - <img width="554" alt="image" src="https://github.com/user-attachments/assets/cf88aac7-6f32-445a-96c7-6bc36fcab9aa">
 
 
