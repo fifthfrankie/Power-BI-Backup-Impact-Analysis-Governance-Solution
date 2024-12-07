@@ -25,6 +25,11 @@ This provides a quick and automated way to identify where and how specific field
 5. Once complete, open 'Power BI Governance Model.pbit' and the model will refresh with your data. All relationships, Visuals, and Measures are set up. Save as PBIX.
 
 
+     .
+
+     .
+    
+ 
 - ** If any modules are required, PowerShell will request to install (user level, no admin access required) **
 
 - ** If Tabular Editor 2 is not installed (or can't be), the final Governance model and report/model metadata extraction won't work - BUT the workspace metadata extraction, all backups, and the dataflow metadata extraction will still work **
