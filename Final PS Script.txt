@@ -177,6 +177,14 @@ $datasourceRenameMap = @{
     "connectionDetails" = "DatasourceConnectionDetails"
 }
 
+$datasetRefreshRenameMap = @{
+    "requestId" = "RefreshRequestId";
+    "id" = "RefreshId";
+    "startTime" = "RefreshStartTime";
+    "endTime" = "RefreshEndTime";
+    "status" = "RefreshStatus"
+}
+
 $reportRenameMap = @{
     "id" = "ReportId";
     "name" = "ReportName";
@@ -253,6 +261,7 @@ $reportPagesInfo = @()
 $appsInfo = @()
 $reportsInAppInfo = @()
 $datasetNameLookup = @{}
+$datasetRefreshHistory = @()
 
 # Loop through filtered workspaces
 foreach ($workspace in $workspacesInfo) {
@@ -342,21 +351,40 @@ foreach ($app in $apps.value) {
     }
 }
 
-# Check if the Excel file already exists and delete it if it does
+# Add refresh history for each dataset
+foreach ($workspace in $workspacesInfo) {
+    foreach ($dataset in $datasetsInfo | Where-Object { $_.WorkspaceId -eq $workspace.WorkspaceId }) {
+        $refreshHistoryUrl = "https://api.powerbi.com/v1.0/myorg/groups/$($workspace.WorkspaceId)/datasets/$($dataset.DatasetId)/refreshes"
+        $refreshHistoryResponse = Invoke-PowerBIRestMethod -Method GET -Url $refreshHistoryUrl | ConvertFrom-Json
+
+        foreach ($refresh in $refreshHistoryResponse.value) {
+            # Rename properties based on the map and dynamically include dataset context
+            $renamedRefreshRecord = Rename-Properties -object $refresh -renameMap $datasetRefreshRenameMap
+            $renamedRefreshRecord | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $workspace.WorkspaceId -Force
+            $renamedRefreshRecord | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $workspace.WorkspaceName -Force
+            $renamedRefreshRecord | Add-Member -NotePropertyName "DatasetId" -NotePropertyValue $dataset.DatasetId -Force
+            $renamedRefreshRecord | Add-Member -NotePropertyName "DatasetName" -NotePropertyValue $dataset.DatasetName -Force
+
+            $datasetRefreshHistory += $renamedRefreshRecord
+        }
+    }
+}
+
+
+# Export all collections to Excel
 if (Test-Path $excelFile) {
     Remove-Item $excelFile -Force
 }
 
-# Export information to Excel
 $workspacesInfo | Export-Excel -Path $excelFile -WorksheetName "Workspaces" -AutoSize
 $datasetsInfo | Export-Excel -Path $excelFile -WorksheetName "Datasets" -AutoSize -Append
 $datasetSourcesInfo | Export-Excel -Path $excelFile -WorksheetName "DatasetSourcesInfo" -AutoSize -Append
+$datasetRefreshHistory | Export-Excel -Path $excelFile -WorksheetName "DatasetRefreshHistory" -AutoSize -Append
 $reportsInfo | Export-Excel -Path $excelFile -WorksheetName "Reports" -AutoSize -Append
 $reportPagesInfo | Export-Excel -Path $excelFile -WorksheetName "ReportPages" -AutoSize -Append
 $appsInfo | Export-Excel -Path $excelFile -WorksheetName "Apps" -AutoSize -Append
 $reportsInAppInfo | Export-Excel -Path $excelFile -WorksheetName "AppReports" -AutoSize -Append
 
-# Notify completion
 Write-Host "Export completed. Data is saved to $excelFile"
 
 
