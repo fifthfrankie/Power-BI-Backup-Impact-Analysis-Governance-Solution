@@ -39,10 +39,10 @@ This provides a quick and automated way to identify where and how specific field
 
 ## Features
 
-### 1. Workspace and Metadata Extraction
-- Leverages Power BI REST API to gather information about Power BI workspaces, datasets, data sources, reports, report pages, and apps.
+### 1. Workspace and Power BI Environment Metadata Extraction
+- Leverages Power BI REST API to gather information about Power BI workspaces, datasets, reports, report pages, and apps.
 - Exports the extracted metadata into a structured Excel workbook with separate worksheets for each entity.
-- You must have at least read acess within workspaces. 'My Workspace' not included.
+- You must have at least read access within workspaces. 'My Workspace' not included.
 - <img width="1255" alt="image" src="https://github.com/user-attachments/assets/515ce3e5-ec56-467a-a421-9da05889eaa5">
 
 
@@ -70,8 +70,17 @@ This provides a quick and automated way to identify where and how specific field
 - Must have edit rights on the related dataflow. 'Ownership' of the Dataflow is not required. Works with all Pro, Premium Capacity, Fabric Capacity workspaces. 'My Workspace' not included.
 - <img width="542" alt="image" src="https://github.com/user-attachments/assets/67e83016-4bc7-4cf5-8d94-1a9779aad6d8">
 
+### 5. Model Connection Details Metadata Extract
+- Leverages Power BI REST API to gather all model connection details.
+- Exports the extracted metadata into the same structured excel workbook as the Power BI Environment Information Extract
+- You must have read permissions on the related model.
+
+### 6. Model Refresh History Metadata Extract
+- Leverages Power BI REST API to gather all model refresh history (limited to the same history shown in the Service).
+- Exports the extracted metadata into the same structured excel workbook as the Power BI Environment Information Extract
+- You must have read permissions on the related model.
   
-### 5. Power BI Governance Model
+### 7. Power BI Governance Model
 - Combines extracts into a Semantic Model to allow easy exploring, impact analysis, and governance of all Power BI Reports, Models, and Dataflows across all Workspaces
 - Works for anyone who runs the script and has at least 1 model and report. Dataflow not required.
 - Public example (limited due to no filter pane): https://app.powerbi.com/view?r=eyJrIjoiNmMxYWQ2ZTItZDM4ZS00MGM1LTlhMDQtN2I1OTMwMzI0OTg2IiwidCI6ImUyY2Y4N2QyLTYxMjktNGExYS1iZTczLTEzOGQyY2Y5OGJlMiJ9
