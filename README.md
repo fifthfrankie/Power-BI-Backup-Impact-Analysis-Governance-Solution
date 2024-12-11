@@ -88,6 +88,8 @@ This provides a quick and automated way to identify where and how specific field
 ## Special Notes
 - The script has a built-in timer to ensure the API bearer token does not expire. It is defaulted to require logging in every 55 minutes. This is only applicable if you have a large number of reports and models (150+)
 - This defaults to looping across all workspaces. If you only want to run this for a specific workspace, you can enter a workspace ID within the quotation marks in $reportSpecificWorkspaceId and/or $modelSpecificWorkspaceId (these are in the first 20 lines of the script)
+- For the best user experience, the final Power BI Govervance Model output is **from the perspective of the Report**. This means that when looking at a Workspace where Reports have the Model sitting in a different Workspace (i.e. multiple reports connected to a model in a different workspace), the Model detail will still be viewable. This ensures you get a comprehensive view of any report. This does not work both ways - when viewing a Workspace with only Models and no Reports, it will only show the Model detail since there are no Reports within that Workspace. If you do not want this perspective and prefer that Model detail only show in the Workspaces they are in, then set the All-Pages filter "Model in Workspace Flag" to TRUE.
+- For backing up Reports & extracting the metadata, this mirrors what you can do at powerbi.com. This means that if you cannot download the report online, then the script will also not be able to download it. For Models, this works differently and if it's within a Premium, PPU, or Fabric capacity, even XMLA-only models can be backed up and extracted by leveraging the XMLA endpoint connection.
 
 ## Screenshots of Final Output
 ..
