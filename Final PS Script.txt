@@ -17,9 +17,6 @@ $modelSpecificWorkspaceId = ""  # Replace with your actual workspace ID or leave
 # Check if a Report specific Workspace ID is provided
 $reportSpecificWorkspaceId = ""  # Replace with your actual workspace ID or leave empty and the script will loop through every workspace
 
-# Do you want to only use the Model specific Workspace ID for the Model & Dataflow Process? Setting to false means the Information Extract will loop through every workspace.
-$useSpecificWorkspaceForModelOnly = $true
-
 # Check for PBI Tools folder and extract if necessary
 $PBIToolsFolderPath = Join-Path -Path $baseFolderPath\Config -ChildPath "PBI Tools"
 $PBIToolsZipPattern = "pbi-tools*.zip"
@@ -234,21 +231,19 @@ $workspacesInfo = @()
 
 foreach ($workspace in $workspacesResponse.value) {
     # Check if we should use specific workspace IDs for filtering
-    if ($useSpecificWorkspaceForModelOnly -eq $true) {
-        # If only modelSpecificWorkspaceId is provided, filter on that alone
-        if ($modelSpecificWorkspaceId -and -not $reportSpecificWorkspaceId -and $workspace.id -ne $modelSpecificWorkspaceId) {
-            continue
-        }
-        # If only reportSpecificWorkspaceId is provided, filter on that alone
-        elseif ($reportSpecificWorkspaceId -and -not $modelSpecificWorkspaceId -and $workspace.id -ne $reportSpecificWorkspaceId) {
-            continue
-        }
-        # If both workspace IDs are provided, filter based on either ID
-        elseif ($modelSpecificWorkspaceId -and $reportSpecificWorkspaceId -and 
-                ($workspace.id -ne $modelSpecificWorkspaceId -and $workspace.id -ne $reportSpecificWorkspaceId)) {
-            continue
-        }
-    }
+# If only modelSpecificWorkspaceId is provided, filter on that alone
+if ($modelSpecificWorkspaceId -and -not $reportSpecificWorkspaceId -and $workspace.id -ne $modelSpecificWorkspaceId) {
+    continue
+}
+# If only reportSpecificWorkspaceId is provided, filter on that alone
+elseif ($reportSpecificWorkspaceId -and -not $modelSpecificWorkspaceId -and $workspace.id -ne $reportSpecificWorkspaceId) {
+    continue
+}
+# If both workspace IDs are provided, filter based on either ID
+elseif ($modelSpecificWorkspaceId -and $reportSpecificWorkspaceId -and 
+        ($workspace.id -ne $modelSpecificWorkspaceId -and $workspace.id -ne $reportSpecificWorkspaceId)) {
+    continue
+}
     # Add the workspace to workspacesInfo if it passes the checks
     $workspacesInfo += Rename-Properties -object $workspace -renameMap $workspaceRenameMap
 }
