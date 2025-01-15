@@ -30,7 +30,7 @@ This provides a quick and automated way to identify where and how specific field
      .
 
 - ** If any modules are required, PowerShell will request to install (user level, no admin access required) **
-
+- ** This solution includes pbi-tools for extracting a BIM file from a PBIX report. This is only leveraged when running against a Pro Workspace and the XMLA endpoint is not an option. Premium, PPU, and Fabric Capacity Workspaces will use the XMLA endpoint to download the model as a BIM file **
 - ** If Tabular Editor 2 is not installed (or can't be), the final Governance model and report/model metadata extraction won't work - BUT the workspace metadata extraction, all backups, and the dataflow metadata extraction will still work **
 
 - ** For users of the commercial/enterprise Tabular Editor 3, Tabular Editor 2 is still required. TE3 does not have a command line interface feature **
