@@ -17,7 +17,7 @@ This provides a quick and automated way to identify where and how specific field
  
 ## Getting Started
 
-### Instructions:
+## Instructions:
 1. Install latest Tabular Editor 2 (https://github.com/TabularEditor/TabularEditor/releases - MIT license)
 2. Create a new folder on your C: drive called 'Power BI Backups' (C:/Power BI Backups)
 3. Place Config folder and the contents from Repo into C:/Power BI Backups
