@@ -30,7 +30,7 @@ This provides a quick and automated way to identify where and how specific field
      .
 
 - ** If any modules are required, PowerShell will request to install (user level, no admin access required) **
-- ** For backing up Models, the solution will first attempt to use the XMLA endpoint via Tabular Editor 2's Command Line Interface. The XMLA endpoint typically available in PPU, Premium, and Fabric workspaces. Within Pro workspaces or when the XMLA endpoint is disabled, pbi-tools is leveraged to extract the Model into a BIM file via the PBIX. This solution includes pbi-tools v1.1.1 (https://github.com/pbi-tools/pbi-tools - AGPL 3.0 license). **
+- ** For backing up Models, the solution will first attempt to use the XMLA endpoint via Tabular Editor 2's Command Line Interface. The XMLA endpoint typically available in PPU, Premium, and Fabric workspaces. Within Pro workspaces or when the XMLA endpoint is disabled, pbi-tools is leveraged to extract the Model into a BIM file via the PBIX. This solution includes pbi-tools v1.2 (https://github.com/pbi-tools/pbi-tools - AGPL 3.0 license). **
 - ** If Tabular Editor 2 is not installed (or can't be), the final Governance model and report/model metadata extraction won't work - BUT the workspace metadata extraction, all backups, and the dataflow metadata extraction will still work **
 
 - ** For users of the commercial/enterprise Tabular Editor 3, Tabular Editor 2 is still required. TE3 does not have a command line interface feature **
