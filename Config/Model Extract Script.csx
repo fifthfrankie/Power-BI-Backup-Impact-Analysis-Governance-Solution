@@ -128,32 +128,33 @@ foreach (var c in Model.AllColumns)
 }
 
 // Add calculated columns data to the string builder
-foreach (var table in Model.Tables)
+var calculatedColumns = Model.Tables
+    .SelectMany(t => t.Columns.OfType<CalculatedColumn>());
+
+foreach (var column in calculatedColumns)
 {
-    foreach (var column in table.Columns.Where(c => c.Type == ColumnType.Calculated))
-    {
-        sb.AppendLine(string.Join(",", 
-            FormatField("CalculatedColumn"),
-            FormatField(column.Table.Name),
-            FormatField(column.Name),
-            FormatField(column.FormatString),
-            FormatField(column.DisplayFolder),
-            FormatField(column.Description),
-            FormatField(column.IsHidden.ToString()),
-            FormatField(""),
-            FormatField(currentDateStr),
-            FormatField(modelName),
-            FormatField(""),
-            FormatField(""),
-            FormatField(""),
-            FormatField(""),
-            FormatField(""),
-            FormatField(""),
-            FormatField(""),
-            FormatField("")
-        ));
-    }
+    sb.AppendLine(string.Join(",", 
+        FormatField("CalculatedColumn"),
+        FormatField(column.Table.Name),
+        FormatField(column.Name),
+        FormatField(column.FormatString),
+        FormatField(column.DisplayFolder),
+        FormatField(column.Description),
+        FormatField(column.IsHidden.ToString()),
+        FormatField(column.Expression),
+        FormatField(currentDateStr),
+        FormatField(modelName),
+        FormatField(""),
+        FormatField(""),
+        FormatField(""),
+        FormatField(""),
+        FormatField(""),
+        FormatField(""),
+        FormatField(""),
+        FormatField("")
+    ));
 }
+
 
 // Process Measures
 foreach (var am in Model.AllMeasures)
