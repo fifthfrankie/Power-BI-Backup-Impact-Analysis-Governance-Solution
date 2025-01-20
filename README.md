@@ -18,7 +18,7 @@ This provides a quick and automated way to identify where and how specific field
 ## Getting Started
 
 ### Instructions:
-1. Install latest Tabular Editor 2 (https://github.com/TabularEditor/TabularEditor/releases)
+1. Install latest Tabular Editor 2 (https://github.com/TabularEditor/TabularEditor/releases - MIT license)
 2. Create a new folder on your C: drive called 'Power BI Backups' (C:/Power BI Backups)
 3. Place Config folder and the contents from Repo into C:/Power BI Backups
 4. Open PowerShell and run 'Final PS Script' (either via copy/paste or renaming the format from .txt to .ps1 and executing)
@@ -30,7 +30,7 @@ This provides a quick and automated way to identify where and how specific field
      .
 
 - ** If any modules are required, PowerShell will request to install (user level, no admin access required) **
-- ** This solution includes pbi-tools for extracting a BIM file from a PBIX report. This is only leveraged when running against a Pro Workspace and the XMLA endpoint is not an option. Premium, PPU, and Fabric Capacity Workspaces will use the XMLA endpoint to download the model as a BIM file **
+- ** For backing up Models, the solution will first attempt to use the XMLA endpoint via Tabular Editor 2's Command Line Interface. The XMLA endpoint typically available in PPU, Premium, and Fabric workspaces. Within Pro workspaces or when the XMLA endpoint is disabled, pbi-tools is leveraged to extract the Model into a BIM file via the PBIX. This solution includes pbi-tools v1.1.1 (https://github.com/pbi-tools/pbi-tools - AGPL 3.0 license). **
 - ** If Tabular Editor 2 is not installed (or can't be), the final Governance model and report/model metadata extraction won't work - BUT the workspace metadata extraction, all backups, and the dataflow metadata extraction will still work **
 
 - ** For users of the commercial/enterprise Tabular Editor 3, Tabular Editor 2 is still required. TE3 does not have a command line interface feature **
