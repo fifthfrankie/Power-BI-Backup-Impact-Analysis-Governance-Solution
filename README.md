@@ -13,9 +13,7 @@ This provides a quick and automated way to identify where and how specific field
 - **Backup Solution**: Automatically backs up every model, report, and dataflow for safekeeping.
 - **User-Friendly Output**: Results are presented in a Power BI model, making them easy to explore, analyze, and share with your team.
 
- 
- 
-## Getting Started
+
 
 ## Instructions:
 1. Install latest Tabular Editor 2 (https://github.com/TabularEditor/TabularEditor/releases - MIT license)
