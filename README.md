@@ -30,6 +30,7 @@ This provides a quick and automated way to identify where and how specific field
      .
 
 - ** If any modules are required, PowerShell will request to install (user level, no admin access required) **
+- ** If you are using the Portable version of Tabular Editor 2 and not the standard Windows installer, make sure to change the Tabular Editor 2 path in the Final PS Script (should be between lines 8-10) to wherever you have the Portable TabularEditor.exe on your computer **
 - ** For backing up Models, the solution will first attempt to use the XMLA endpoint via Tabular Editor 2's Command Line Interface. The XMLA endpoint typically available in PPU, Premium, and Fabric workspaces. Within Pro workspaces or when the XMLA endpoint is disabled, pbi-tools is leveraged to extract the Model into a BIM file via the PBIX. This solution includes pbi-tools v1.2 (https://github.com/pbi-tools/pbi-tools - AGPL 3.0 license). **
 - ** If Tabular Editor 2 is not installed (or can't be), the final Governance model and report/model metadata extraction won't work - BUT the workspace metadata extraction, all backups, and the dataflow metadata extraction will still work **
 
