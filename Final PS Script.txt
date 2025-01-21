@@ -4,12 +4,13 @@ $Script1Path = "$baseFolderPath\Config\Visual Object Layer Extract Script.csx"
 $Script2Path = "$baseFolderPath\Config\Model Extract Script.csx"
 $Script3Path = "$baseFolderPath\Config\Measure Dependency Script.csx"
 
+#### If you are using the Portable version of Tabular Editor 2 and not the standard Windows installer, make sure to change the path for the TabularEditor.exe below ####
+$TabularEditor2Path = "C:\Program Files (x86)\Tabular Editor\TabularEditor.exe"
+
 $ErrorActionPreference = "SilentlyContinue"
 
 # Define the Information Extract Excel file path
 $excelFile = "$baseFolderPath\Power BI Information Extract\Power BI Information Extract.xlsx"
-
-$TabularEditor2Path = "C:\Program Files (x86)\Tabular Editor\TabularEditor.exe"
 
 # Check if a Model & Dataflow specific Workspace ID is provided
 $modelSpecificWorkspaceId = ""  # Replace with your actual workspace ID or leave empty and the script will loop through every workspace
