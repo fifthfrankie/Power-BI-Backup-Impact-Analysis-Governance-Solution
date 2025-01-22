@@ -18,10 +18,9 @@ This provides a quick and automated way to identify where and how specific field
      .
 
 ## Instructions:
-1. Install the latest Tabular Editor 2 (https://github.com/TabularEditor/TabularEditor/releases - MIT license).
-     - For Tabular Editor, if you cannot use the Windows Installer and only have access to the Portable version, please see the first ** note below before running the Final PS Script in step 4.
-3. Create a new folder on your C: drive called 'Power BI Backups' (C:/Power BI Backups).
-4. Place the Config folder and the contents from Repo into C:/Power BI Backups.
+
+1. Create a new folder on your C: drive called 'Power BI Backups' (C:/Power BI Backups).
+2. Download contents of this repo and place in C:\Power BI Backups folder. The contents of the Config folder should be at C:\Power BI Backups\Config
 5. Open PowerShell and run 'Final PS Script' (either via copy/paste or renaming the format from .txt to .ps1 and executing).
 6. Once complete, open 'Power BI Governance Model.pbit' and the model will refresh with your data. All relationships, Visuals, and Measures are set up. Save as PBIX.
 
@@ -30,11 +29,9 @@ This provides a quick and automated way to identify where and how specific field
 
      .
 
-- ** If you are using the Portable version of Tabular Editor 2 and not the standard Windows installer, make sure to change the Tabular Editor 2 path in the Final PS Script (should be between lines 8-10) to wherever you have the Portable TabularEditor.exe on your computer **
 - ** If any modules are required within PowerShell, PowerShell will request to install (user level, no admin access required) **
+- ** This includes the portable version of Tabular Editor 2 v2.25.0 (https://github.com/TabularEditor/TabularEditor - MIT License). This no longer requires having it preinstalled, as it will run from the portable version with no differences. ** 
 - ** For backing up Models, the solution will first attempt to use the XMLA endpoint via Tabular Editor 2's Command Line Interface. The XMLA endpoint typically available in PPU, Premium, and Fabric workspaces. Within Pro workspaces or when the XMLA endpoint is disabled, pbi-tools is leveraged to extract the Model into a BIM file via the PBIX. This solution includes pbi-tools v1.2 (https://github.com/pbi-tools/pbi-tools - AGPL 3.0 license). **
-- ** If Tabular Editor 2 is not installed (or can't be), the final Governance model and report/model metadata extraction won't work - BUT the workspace metadata extraction, all backups, and the dataflow metadata extraction will still work **
-
 - ** For users of the commercial/enterprise Tabular Editor 3, Tabular Editor 2 is still required. TE3 does not have a command line interface feature **
 - ** If you see a refresh error in the Power BI Governance Model Template along the lines of "Query XXXXXX references other queries or steps, so it may not directly access a data source. Please rebuild this data combination", this is related to the privacy settings within Power BI Desktop. To resolve, go to: File -> Options and settings -> Options -> Privacy (under Global) -> change to EITHER "Combine data according to each file's Privacy Level settings" or "Always Ignore Privacy Level Settings". The template model file is set to ignore privacy settings for the excel files - but requires that the global privacy settings are either per file or always ignored. **
 
