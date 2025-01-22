@@ -3,9 +3,7 @@ $baseFolderPath = "C:\Power BI Backups"
 $Script1Path = "$baseFolderPath\Config\Visual Object Layer Extract Script.csx"
 $Script2Path = "$baseFolderPath\Config\Model Extract Script.csx"
 $Script3Path = "$baseFolderPath\Config\Measure Dependency Script.csx"
-
-#### If you are using the Portable version of Tabular Editor 2 and not the standard Windows installer, make sure to change the path for the TabularEditor.exe below ####
-$TabularEditor2Path = "C:\Program Files (x86)\Tabular Editor\TabularEditor.exe"
+$TabularEditor2Path = "$baseFolderPath\Config\TabularEditor\TabularEditor.exe"
 
 $ErrorActionPreference = "SilentlyContinue"
 
@@ -34,6 +32,28 @@ if (-not (Test-Path -Path $PBIToolsFolderPath)) {
         Write-Output "Extracted $($zipFile.Name) to $PBIToolsFolderPath"
     }
 }
+
+# Define the folder path and zip pattern for Tabular Editor
+$TabularEditorFolderPath = Join-Path -Path $baseFolderPath\Config -ChildPath "TabularEditor"
+$TabularEditorZipPattern = "TabularEditor*.zip"
+
+if (-not (Test-Path -Path $TabularEditorFolderPath)) {
+    # Check if there is any zip file matching the pattern
+    $zipFile = Get-ChildItem -Path $baseFolderPath\Config -Filter $TabularEditorZipPattern | Select-Object -First 1
+    if ($zipFile) {
+        # Create the Tabular Editor folder
+        New-Item -Path $TabularEditorFolderPath -ItemType Directory -Force
+        # Extract the zip file contents into the Tabular Editor folder
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+        [System.IO.Compression.ZipFile]::ExtractToDirectory($zipFile.FullName, $TabularEditorFolderPath)
+        Write-Output "Extracted $($zipFile.Name) to $TabularEditorFolderPath"
+    } else {
+        Write-Output "No zip file matching the pattern $TabularEditorZipPattern found in $baseFolderPath\Config"
+    }
+} else {
+    Write-Output "Tabular Editor folder already exists at $TabularEditorFolderPath"
+}
+
 
 # Add the PBI Tools folder to the PATH environment variable only if it's not already there
 $existingPath = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
