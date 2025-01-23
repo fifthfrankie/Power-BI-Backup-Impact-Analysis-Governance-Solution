@@ -1,20 +1,20 @@
 # Define the base folder and script paths at the beginning of the script
+
 $baseFolderPath = "C:\Power BI Backups"
-$Script1Path = "$baseFolderPath\Config\Visual Object Layer Extract Script.csx"
-$Script2Path = "$baseFolderPath\Config\Model Extract Script.csx"
-$Script3Path = "$baseFolderPath\Config\Measure Dependency Script.csx"
+$Script1Path = "$baseFolderPath\Config\Report Detail Extract Script.csx"
+$Script2Path = "$baseFolderPath\Config\Model Detail Extract Script.csx"
+$Script3Path = "$baseFolderPath\Config\Measure Dependency Extract Script.csx"
 $TabularEditor2Path = "$baseFolderPath\Config\TabularEditor\TabularEditor.exe"
 
+
+# Enter Workspace ID between quotation marks if you only want script to run in 1 or 2 workspaces. Leave BOTH empty if you want to loop through all.
+
+$SpecificWorkspaceID1 = ""  # Replace with your actual workspace ID or leave empty and the script will loop through every workspace
+
+$SpecificWorkspaceID2 = ""  # Replace with your actual workspace ID or leave empty and the script will loop through every workspace
+
+
 $ErrorActionPreference = "SilentlyContinue"
-
-# Define the Information Extract Excel file path
-$excelFile = "$baseFolderPath\Power BI Information Extract\Power BI Information Extract.xlsx"
-
-# Check if a Model & Dataflow specific Workspace ID is provided
-$modelSpecificWorkspaceId = ""  # Replace with your actual workspace ID or leave empty and the script will loop through every workspace
-
-# Check if a Report specific Workspace ID is provided
-$reportSpecificWorkspaceId = ""  # Replace with your actual workspace ID or leave empty and the script will loop through every workspace
 
 # Check for PBI Tools folder and extract if necessary
 $PBIToolsFolderPath = Join-Path -Path $baseFolderPath\Config -ChildPath "PBI Tools"
@@ -135,7 +135,7 @@ $date = (Get-Date -UFormat "%Y-%m-%d")
 
 
 
-#### Start of Power BI Information Extract ####
+#### Start of Power BI Environment Detail Extract ####
 
 
 
@@ -143,6 +143,9 @@ $date = (Get-Date -UFormat "%Y-%m-%d")
 
 
 
+
+# Define the Information Extract Excel file path
+$excelFile = "$baseFolderPath\Power BI Environment Detail.xlsx"
 
 # Function to rename properties in objects and handle duplicates
 function Rename-Properties {
@@ -252,17 +255,17 @@ $workspacesInfo = @()
 
 foreach ($workspace in $workspacesResponse.value) {
     # Check if we should use specific workspace IDs for filtering
-# If only modelSpecificWorkspaceId is provided, filter on that alone
-if ($modelSpecificWorkspaceId -and -not $reportSpecificWorkspaceId -and $workspace.id -ne $modelSpecificWorkspaceId) {
+# If only SpecificWorkspaceID1 is provided, filter on that alone
+if ($SpecificWorkspaceID1 -and -not $SpecificWorkspaceID2 -and $workspace.id -ne $SpecificWorkspaceID1) {
     continue
 }
-# If only reportSpecificWorkspaceId is provided, filter on that alone
-elseif ($reportSpecificWorkspaceId -and -not $modelSpecificWorkspaceId -and $workspace.id -ne $reportSpecificWorkspaceId) {
+# If only SpecificWorkspaceID2 is provided, filter on that alone
+elseif ($SpecificWorkspaceID2 -and -not $SpecificWorkspaceID1 -and $workspace.id -ne $SpecificWorkspaceID2) {
     continue
 }
 # If both workspace IDs are provided, filter based on either ID
-elseif ($modelSpecificWorkspaceId -and $reportSpecificWorkspaceId -and 
-        ($workspace.id -ne $modelSpecificWorkspaceId -and $workspace.id -ne $reportSpecificWorkspaceId)) {
+elseif ($SpecificWorkspaceID1 -and $SpecificWorkspaceID2 -and 
+        ($workspace.id -ne $SpecificWorkspaceID1 -and $workspace.id -ne $SpecificWorkspaceID2)) {
     continue
 }
     # Add the workspace to workspacesInfo if it passes the checks
@@ -410,7 +413,7 @@ Write-Host "Export completed. Data is saved to $excelFile"
 
 
 
-#### Start of Model Export ####
+#### Start of Model Backup ####
 
 
 
@@ -419,10 +422,6 @@ Write-Host "Export completed. Data is saved to $excelFile"
 
 
 
-# Use only the modelSpecificWorkspaceId for the model and dataflow processes if provided
-if ($modelSpecificWorkspaceId) {
-    $datasetsInfo = $datasetsInfo | Where-Object { $_.WorkspaceId -eq $modelSpecificWorkspaceId }
-}
 
 # Loop through datasetsInfo collection to perform model export
 foreach ($dataset in $datasetsInfo) {
@@ -432,12 +431,12 @@ foreach ($dataset in $datasetsInfo) {
 
     # Clean up workspace name
     $cleanDatasetWorkspaceName = $dataset.WorkspaceName -replace '\[', '(' -replace '\]', ')'
-    $cleanDatasetWorkspaceName = $cleanDatasetWorkspaceName -replace "[^a-zA-Z0-9\(\)&.-]", " "
+    $cleanDatasetWorkspaceName = $cleanDatasetWorkspaceName -replace "[^a-zA-Z0-9\(\)&,.-]", " "
     $cleanDatasetWorkspaceName = $cleanDatasetWorkspaceName.TrimStart()
 
     # Clean up dataset name
     $cleanDatasetName = $datasetName -replace '\[', '(' -replace '\]', ')'
-    $cleanDatasetName = $cleanDatasetName -replace "[^a-zA-Z0-9\(\)&.-]", " "
+    $cleanDatasetName = $cleanDatasetName -replace "[^a-zA-Z0-9\(\)&,.-]", " "
     $cleanDatasetName = $cleanDatasetName.TrimStart()
 
     # Construct the folder path and create it if it doesn't exist
@@ -483,7 +482,7 @@ Model.Database.Name = `"$newModelDatabaseName`";
 
 
 
-#### Start of Report Backup and VOL Extract ####
+#### Start of Report Backup ####
 
 
 
@@ -519,10 +518,6 @@ if (-not (Test-Path -Path $tempExtractFolder)) {
     New-Item -Path $tempExtractFolder -ItemType Directory -Force
 }
 
-# Use only the reportSpecificWorkspaceId for the report process if provided
-if ($reportSpecificWorkspaceId) {
-    $workspacesInfo = $workspacesInfo | Where-Object { $_.WorkspaceId -eq $reportSpecificWorkspaceId }
-}
 
 foreach ($workspace in $workspacesInfo) {
     $workspaceName = $workspace.WorkspaceName
@@ -530,7 +525,7 @@ foreach ($workspace in $workspacesInfo) {
 
     # Clean up workspace name
     $cleanWorkspaceName = $workspaceName -replace '\[', '(' -replace '\]', ')'
-    $cleanWorkspaceName = $cleanWorkspaceName -replace "[^a-zA-Z0-9\(\)&.-]", " "
+    $cleanWorkspaceName = $cleanWorkspaceName -replace "[^a-zA-Z0-9\(\)&,.-]", " "
     $cleanWorkspaceName = $cleanWorkspaceName.TrimStart()
 
     # Fetch reports in the workspace
@@ -540,7 +535,7 @@ foreach ($workspace in $workspacesInfo) {
     foreach ($report in $reports) {
         # Clean up report name
         $cleanReportName = $report.Name -replace '\[', '(' -replace '\]', ')'
-        $cleanReportName = $cleanReportName -replace "[^a-zA-Z0-9\(\)&.-]", " "
+        $cleanReportName = $cleanReportName -replace "[^a-zA-Z0-9\(\)&,.-]", " "
         $cleanReportName = $cleanReportName.TrimStart()
 
         # Determine the file extension based on the report type
@@ -635,7 +630,7 @@ Remove-Item -Path $baseFolderPath\localhost -Recurse -Force
 
 
 
-#### Start of Tabular Editor Report VOL Extract ####
+#### Start of Tabular Editor Report Detail (Visual Object Layer) Extract ####
 
 
 
@@ -649,7 +644,7 @@ $p = Start-Process -filePath "$TabularEditor2Path" -Wait -NoNewWindow -PassThru 
        -ArgumentList "`"$baseFolderPath\Config\Blank Model.bim`" -S `"$Script1Path`" -B `"localhost\tabular`" `"MyModel`""
 
 # Define the output Excel file path in the parent folder
-$outputExcelFile = Join-Path -Path $baseFolderPath -ChildPath "VisualObjectLayer.xlsx"
+$outputExcelFile = Join-Path -Path $baseFolderPath -ChildPath "Report Detail.xlsx"
 
 # Check if the Excel file already exists and delete it if it does
 if (Test-Path -Path $outputExcelFile) {
@@ -718,7 +713,7 @@ if (Test-Path -Path $newDateFolder) {
 
 
 
-#### Start of Model Script Run with Script2Path ####
+#### Start of Model Detail Script Run with Script2Path ####
 
 
 
@@ -758,12 +753,12 @@ foreach ($dataset in $datasetsInfo) {
 
     # Clean up workspace name
     $cleanDatasetWorkspaceName = $workspaceName -replace '\[', '(' -replace '\]', ')'
-    $cleanDatasetWorkspaceName = $cleanDatasetWorkspaceName -replace "[^a-zA-Z0-9\(\)&.-]", " "
+    $cleanDatasetWorkspaceName = $cleanDatasetWorkspaceName -replace "[^a-zA-Z0-9\(\)&,.-]", " "
     $cleanDatasetWorkspaceName = $cleanDatasetWorkspaceName.TrimStart()
 
     # Clean up dataset name
     $cleanDatasetName = $datasetName -replace '\[', '(' -replace '\]', ')'
-    $cleanDatasetName = $cleanDatasetName -replace "[^a-zA-Z0-9\(\)&.-]", " "
+    $cleanDatasetName = $cleanDatasetName -replace "[^a-zA-Z0-9\(\)&,.-]", " "
     $cleanDatasetName = $cleanDatasetName.TrimStart()
 
     # Construct the argument list for the first model script run
@@ -778,7 +773,7 @@ Write-Host "First model export and script run completed."
 #### Start of PowerShell Combining to Semantic Models Worksheet ####
 
 # Define the output Excel file path in the base folder
-$outputExcelFile = Join-Path -Path $baseFolderPath -ChildPath "ModelDetail.xlsx"
+$outputExcelFile = Join-Path -Path $baseFolderPath -ChildPath "Model Detail.xlsx"
 
 # Check if the Excel file already exists and delete it if it does
 if (Test-Path -Path $outputExcelFile) {
@@ -811,7 +806,7 @@ Write-Output "CSV files combined into the 'Semantic Models' worksheet in $output
 
 
 
-#### Start of Model Script Run with Script3Path ####
+#### Start of Model Detail Script Run with Script3Path ####
 
 
 
@@ -827,12 +822,12 @@ foreach ($dataset in $datasetsInfo) {
 
     # Clean up workspace name
     $cleanDatasetWorkspaceName = $workspaceName -replace '\[', '(' -replace '\]', ')'
-    $cleanDatasetWorkspaceName = $cleanDatasetWorkspaceName -replace "[^a-zA-Z0-9\(\)&.-]", " "
+    $cleanDatasetWorkspaceName = $cleanDatasetWorkspaceName -replace "[^a-zA-Z0-9\(\)&,.-]", " "
     $cleanDatasetWorkspaceName = $cleanDatasetWorkspaceName.TrimStart()
 
     # Clean up dataset name
     $cleanDatasetName = $datasetName -replace '\[', '(' -replace '\]', ')'
-    $cleanDatasetName = $cleanDatasetName -replace "[^a-zA-Z0-9\(\)&.-]", " "
+    $cleanDatasetName = $cleanDatasetName -replace "[^a-zA-Z0-9\(\)&,.-]", " "
     $cleanDatasetName = $cleanDatasetName.TrimStart()
 
     # Construct the argument list for the second model script run
@@ -872,7 +867,7 @@ Write-Output "CSV files combined into the 'Measure Dependencies' worksheet in $o
 
 
 
-#### Start of Power BI Dataflow Extract ####
+#### Start of Power BI Dataflow Backup and Detail Extract ####
 
 
 
@@ -916,7 +911,7 @@ if ($latestDataflowDateFolder) {
 }
 
 # Set the combined Excel output path
-$combinedExcelOutputPath = Join-Path -Path $dataflow_new_date_folder -ChildPath "DataflowDetail.xlsx"
+$combinedExcelOutputPath = Join-Path -Path $dataflow_new_date_folder -ChildPath "Dataflow Detail.xlsx"
 
 # Define the headers
 $headers = @("Dataflow ID", "Dataflow Name", "Query Name", "Query", "Report Date", "Workspace Name - Dataflow Name")
@@ -946,9 +941,6 @@ function IsInsideCurlyBraces {
 
 # Loop through all workspaces to fetch dataflows
 
-if ($modelSpecificWorkspaceId) {
-        $workspaces = $workspaces | Where-Object { $_.Id -eq $modelSpecificWorkspaceId }
-}
 
 foreach ($workspace in $workspacesInfo) {
     $workspaceName = $workspace.WorkspaceName
@@ -974,12 +966,12 @@ foreach ($workspace in $workspacesInfo) {
 
             # Clean up workspace name
             $cleanWorkspaceName = $workspaceName -replace '\[', '(' -replace '\]', ')'
-            $cleanWorkspaceName = $cleanWorkspaceName -replace "[^a-zA-Z0-9\(\)&.-]", " "
+            $cleanWorkspaceName = $cleanWorkspaceName -replace "[^a-zA-Z0-9\(\)&,.-]", " "
             $cleanWorkspaceName = $cleanWorkspaceName.TrimStart()
 
             # Clean up dataflow name
             $cleanDataFlowName = $dataflowName -replace '\[', '(' -replace '\]', ')'
-            $cleanDataFlowName = $cleanDataFlowName -replace "[^a-zA-Z0-9\(\)&.-]", " "
+            $cleanDataFlowName = $cleanDataFlowName -replace "[^a-zA-Z0-9\(\)&,.-]", " "
             $cleanDataFlowName = $cleanDataFlowName.TrimStart()
             
             # Define output file path specific to the dataflow
@@ -1049,7 +1041,7 @@ foreach ($workspace in $workspacesInfo) {
                                                       -replace '\\n', ' ' `
                                                       -replace '\\', '' `
                                                       -replace '\r\n', "`n" `
-                                                      -creplace '(?<!["\w])r(\s)(?![\w"])', '$1' `
+                                                      -replace '(?<!["\w])r(\s)(?![\w"])', '$1' `
                                                       -replace '\;r', ''
 
             $formattedTextStep9 = $formattedTextStep8 -replace '(?<=let|in|each)\s+', "`n    " `
@@ -1150,7 +1142,7 @@ $combinedDataTable | Export-Excel -Path $combinedExcelOutputPath -AutoSize
 Write-Output "Data exported to $combinedExcelOutputPath"
 
 # Combine files if both are there
-$fileName = "DataflowDetail.xlsx"
+$fileName = "Dataflow Detail.xlsx"
 $sourceFilePath = Join-Path -Path $dataflow_new_date_folder -ChildPath $fileName
 $destinationFilePath = Join-Path -Path $baseFolderPath -ChildPath $fileName
 
