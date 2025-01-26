@@ -390,6 +390,104 @@ foreach ($workspace in $workspacesInfo) {
 }
 
 
+
+#### Start of 'My Workspace' detail extract ####
+
+
+
+# Define "My Workspace" constants
+$myWorkspaceId = "My Workspace"
+$myWorkspaceName = "My Workspace"
+
+# Manually add "My Workspace" breakdown to workspacesInfo
+$myWorkspaceDetails = [PSCustomObject]@{
+    WorkspaceId                 = $myWorkspaceId
+    WorkspaceName               = $myWorkspaceName
+    WorkspaceType               = "Workspace"
+    WorkspaceIsReadOnly         = $false
+    WorkspaceIsOnDedicatedCapacity = $false
+}
+$workspacesInfo += $myWorkspaceDetails
+
+# Fetch datasets from "My Workspace"
+$myWorkspaceDatasetsUrl = "https://api.powerbi.com/v1.0/myorg/datasets"
+$myWorkspaceDatasets = Invoke-PowerBIRestMethod -Method GET -Url $myWorkspaceDatasetsUrl | ConvertFrom-Json
+
+foreach ($dataset in $myWorkspaceDatasets.value) {
+    $renamedDataset = Rename-Properties -object $dataset -renameMap $datasetRenameMap
+    $renamedDataset | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $myWorkspaceId -Force
+    $renamedDataset | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $myWorkspaceName -Force
+
+    # Store the DatasetId and DatasetName in the lookup table
+    $datasetNameLookup[$dataset.id] = $dataset.name
+    $datasetsInfo += $renamedDataset
+
+    # Fetch dataset sources
+    $datasourcesUrl = "https://api.powerbi.com/v1.0/myorg/datasets/$($dataset.id)/datasources"
+    $datasources = Invoke-PowerBIRestMethod -Method GET -Url $datasourcesUrl | ConvertFrom-Json
+
+    foreach ($datasource in $datasources.value) {
+        $renamedDatasource = Rename-Properties -object $datasource -renameMap $datasourceRenameMap
+        $renamedDatasource | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $myWorkspaceId -Force
+        $renamedDatasource | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $myWorkspaceName -Force
+        $renamedDatasource | Add-Member -NotePropertyName "DatasetId" -NotePropertyValue $dataset.id -Force
+        $renamedDatasource | Add-Member -NotePropertyName "DatasetName" -NotePropertyValue $dataset.name -Force
+        if ($datasource.connectionDetails) {
+            $renamedDatasource.DatasourceConnectionDetails = $datasource.connectionDetails | ConvertTo-Json -Compress
+        }
+        $datasetSourcesInfo += $renamedDatasource
+    }
+}
+
+# Fetch reports from "My Workspace"
+$myWorkspaceReportsUrl = "https://api.powerbi.com/v1.0/myorg/reports"
+$myWorkspaceReports = Invoke-PowerBIRestMethod -Method GET -Url $myWorkspaceReportsUrl | ConvertFrom-Json
+
+foreach ($report in $myWorkspaceReports.value) {
+    $renamedReport = Rename-Properties -object $report -renameMap $reportRenameMap
+    $renamedReport | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $myWorkspaceId -Force
+    $renamedReport | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $myWorkspaceName -Force
+
+    # Retrieve and add the correct DatasetName from the lookup table if DatasetId exists
+    $datasetId = $report.datasetId
+    if ($datasetId -and $datasetNameLookup.ContainsKey($datasetId)) {
+        $renamedReport | Add-Member -NotePropertyName "DatasetName" -NotePropertyValue $datasetNameLookup[$datasetId] -Force
+    } else {
+        $renamedReport | Add-Member -NotePropertyName "DatasetName" -NotePropertyValue "Unknown Dataset" -Force
+    }
+
+    $reportsInfo += $renamedReport
+
+    # Fetch report pages
+    $pagesUrl = "https://api.powerbi.com/v1.0/myorg/reports/$($report.id)/pages"
+    $pages = Invoke-PowerBIRestMethod -Method GET -Url $pagesUrl | ConvertFrom-Json
+    foreach ($page in $pages.value) {
+        $renamedPage = Rename-Properties -object $page -renameMap $pageRenameMap
+        $renamedPage | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $myWorkspaceId -Force
+        $renamedPage | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $myWorkspaceName -Force
+        $renamedPage | Add-Member -NotePropertyName "ReportId" -NotePropertyValue $report.id -Force
+        $renamedPage | Add-Member -NotePropertyName "ReportName" -NotePropertyValue $report.name -Force
+        $reportPagesInfo += $renamedPage
+    }
+}
+
+# Add refresh history for each dataset in "My Workspace"
+foreach ($dataset in $datasetsInfo | Where-Object { $_.WorkspaceId -eq $myWorkspaceId }) {
+    $refreshHistoryUrl = "https://api.powerbi.com/v1.0/myorg/datasets/$($dataset.DatasetId)/refreshes"
+    $refreshHistoryResponse = Invoke-PowerBIRestMethod -Method GET -Url $refreshHistoryUrl | ConvertFrom-Json
+
+    foreach ($refresh in $refreshHistoryResponse.value) {
+        # Rename properties based on the map and dynamically include dataset context
+        $renamedRefreshRecord = Rename-Properties -object $refresh -renameMap $datasetRefreshRenameMap
+        $renamedRefreshRecord | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $myWorkspaceId -Force
+        $renamedRefreshRecord | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $myWorkspaceName -Force
+        $renamedRefreshRecord | Add-Member -NotePropertyName "DatasetId" -NotePropertyValue $dataset.DatasetId -Force
+        $renamedRefreshRecord | Add-Member -NotePropertyName "DatasetName" -NotePropertyValue $dataset.DatasetName -Force
+
+        $datasetRefreshHistory += $renamedRefreshRecord
+    }
+}
+
 # Export all collections to Excel
 if (Test-Path $excelFile) {
     Remove-Item $excelFile -Force
@@ -405,6 +503,7 @@ $appsInfo | Export-Excel -Path $excelFile -WorksheetName "Apps" -AutoSize -Appen
 $reportsInAppInfo | Export-Excel -Path $excelFile -WorksheetName "AppReports" -AutoSize -Append
 
 Write-Host "Export completed. Data is saved to $excelFile"
+ 
 
 
 
