@@ -206,11 +206,12 @@ $dataflowDatasourceRenameMap = @{
 }
 
 $datasetRefreshRenameMap = @{
-    "requestId" = "RefreshRequestId";
-    "id" = "RefreshId";
-    "startTime" = "RefreshStartTime";
-    "endTime" = "RefreshEndTime";
-    "status" = "RefreshStatus"
+    "requestId" = "DatasetRefreshRequestId";
+    "id" = "DatasetRefreshId";
+    "startTime" = "DatasetRefreshStartTime";
+    "endTime" = "DatasetRefreshEndTime";
+    "status" = "DatasetRefreshStatus"
+    "refreshType" = "DatasetRefreshType"
 }
 
 $dataflowRefreshRenameMap = @{
