@@ -191,11 +191,11 @@ $datasetRenameMap = @{
     "createdDate" = "DatasetCreatedDate"
 }
 
-$datasourceRenameMap = @{
-    "datasourceType" = "DatasourceType";
-    "datasourceId" = "DatasourceId";
-    "gatewayId" = "DatasourceGatewayId";
-    "connectionDetails" = "DatasourceConnectionDetails"
+$datasetDatasourceRenameMap = @{
+    "datasourceType" = "DatasetDatasourceType";
+    "datasourceId" = "DatasetDatasourceId";
+    "gatewayId" = "DatasetDatasourceGatewayId";
+    "connectionDetails" = "DatasetDatasourceConnectionDetails"
 }
 
 $dataflowDatasourceRenameMap = @{
@@ -340,7 +340,7 @@ foreach ($workspace in $workspacesInfo) {
         $datasources = Invoke-PowerBIRestMethod -Method GET -Url $datasourcesUrl | ConvertFrom-Json
 
         foreach ($datasource in $datasources.value) {
-            $renamedDatasource = Rename-Properties -object $datasource -renameMap $datasourceRenameMap
+            $renamedDatasource = Rename-Properties -object $datasource -renameMap $datasetDatasourceRenameMap
             $renamedDatasource | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $workspace.WorkspaceId -Force
             $renamedDatasource | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $workspace.WorkspaceName -Force
             $renamedDatasource | Add-Member -NotePropertyName "DatasetId" -NotePropertyValue $dataset.id -Force
@@ -586,7 +586,7 @@ foreach ($dataset in $myWorkspaceDatasets.value) {
     $datasources = Invoke-PowerBIRestMethod -Method GET -Url $datasourcesUrl | ConvertFrom-Json
 
     foreach ($datasource in $datasources.value) {
-        $renamedDatasource = Rename-Properties -object $datasource -renameMap $datasourceRenameMap
+        $renamedDatasource = Rename-Properties -object $datasource -renameMap $datasetDatasourceRenameMap
         $renamedDatasource | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $myWorkspaceId -Force
         $renamedDatasource | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $myWorkspaceName -Force
         $renamedDatasource | Add-Member -NotePropertyName "DatasetId" -NotePropertyValue $dataset.id -Force
