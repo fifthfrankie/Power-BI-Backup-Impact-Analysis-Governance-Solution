@@ -224,11 +224,11 @@ $dataflowRefreshRenameMap = @{
 }
 
 $dataflowRenameMap = @{
-    "configuredBy"      = "ConfiguredBy"
+    "configuredBy"      = "DatafowConfiguredBy"
     "description"       = "DataflowDescription"
     "modelUrl"         = "DataflowJsonURL"
-    "modifiedBy"       = "ModifiedBy"
-    "modifiedDateTime" = "ModifiedDateTime"
+    "modifiedBy"       = "DataflowModifiedBy"
+    "modifiedDateTime" = "DataflowModifiedDateTime"
     "name"             = "DataflowName"
     "objectId"         = "DataflowId"
 }
