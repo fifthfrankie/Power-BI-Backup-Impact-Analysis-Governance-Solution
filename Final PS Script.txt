@@ -210,7 +210,7 @@ $datasetRefreshRenameMap = @{
     "id" = "DatasetRefreshId";
     "startTime" = "DatasetRefreshStartTime";
     "endTime" = "DatasetRefreshEndTime";
-    "status" = "DatasetRefreshStatus"
+    "status" = "DatasetRefreshStatus";
     "refreshType" = "DatasetRefreshType"
 }
 
@@ -220,22 +220,23 @@ $dataflowRefreshRenameMap = @{
     "startTime" = "DataflowRefreshStartTime";
     "endTime" = "DataflowRefreshEndTime";
     "status" = "DataflowRefreshStatus" ;
-    "refreshType" = "DataflowRefreshType"
+    "refreshType" = "DataflowRefreshType" ;
+    "errorInfo" = "DataflowErrorInfo"
 }
 
 $dataflowRenameMap = @{
-    "configuredBy"      = "DatafowConfiguredBy"
-    "description"       = "DataflowDescription"
-    "modelUrl"         = "DataflowJsonURL"
-    "modifiedBy"       = "DataflowModifiedBy"
-    "modifiedDateTime" = "DataflowModifiedDateTime"
-    "name"             = "DataflowName"
+    "configuredBy"      = "DatafowConfiguredBy";
+    "description"       = "DataflowDescription";
+    "modelUrl"         = "DataflowJsonURL";
+    "modifiedBy"       = "DataflowModifiedBy";
+    "modifiedDateTime" = "DataflowModifiedDateTime";
+    "name"             = "DataflowName";
     "objectId"         = "DataflowId"
 }
 
 $dataflowLineageRenameMap = @{
-    "datasetObjectId"   = "DatasetId"
-    "dataflowObjectId"  = "DataflowId"
+    "datasetObjectId"   = "DatasetId";
+    "dataflowObjectId"  = "DataflowId";
     "workspaceObjectId" = "WorkspaceId"
 }
 
