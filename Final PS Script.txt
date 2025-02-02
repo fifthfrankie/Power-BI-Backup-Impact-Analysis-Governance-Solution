@@ -191,19 +191,54 @@ $datasetRenameMap = @{
     "createdDate" = "DatasetCreatedDate"
 }
 
-$datasourceRenameMap = @{
-    "datasourceType" = "DatasourceType";
-    "datasourceId" = "DatasourceId";
-    "gatewayId" = "DatasourceGatewayId";
-    "connectionDetails" = "DatasourceConnectionDetails"
+$datasetDatasourceRenameMap = @{
+    "datasourceType" = "DatasetDatasourceType";
+    "datasourceId" = "DatasetDatasourceId";
+    "gatewayId" = "DatasetDatasourceGatewayId";
+    "connectionDetails" = "DatasetDatasourceConnectionDetails"
+}
+
+$dataflowDatasourceRenameMap = @{
+    "datasourceType" = "DataflowDatasourceType";
+    "datasourceId" = "DataflowDatasourceId";
+    "gatewayId" = "DataflowDatasourceGatewayId";
+    "connectionDetails" = "DataflowDatasourceConnectionDetails"
 }
 
 $datasetRefreshRenameMap = @{
-    "requestId" = "RefreshRequestId";
-    "id" = "RefreshId";
-    "startTime" = "RefreshStartTime";
-    "endTime" = "RefreshEndTime";
-    "status" = "RefreshStatus"
+    "requestId" = "DatasetRefreshRequestId";
+    "id" = "DatasetRefreshId";
+    "startTime" = "DatasetRefreshStartTime";
+    "endTime" = "DatasetRefreshEndTime";
+    "status" = "DatasetRefreshStatus";
+    "refreshType" = "DatasetRefreshType"
+}
+
+$dataflowRefreshRenameMap = @{
+    "requestId" = "DataflowRefreshRequestId";
+    "id" = "DataflowRefreshId";
+    "startTime" = "DataflowRefreshStartTime";
+    "endTime" = "DataflowRefreshEndTime";
+    "status" = "DataflowRefreshStatus" ;
+    "refreshType" = "DataflowRefreshType" ;
+    "errorInfo" = "DataflowErrorInfo"
+}
+
+$dataflowRenameMap = @{
+    "configuredBy"      = "DataflowConfiguredBy";
+    "description"       = "DataflowDescription";
+    "modelUrl"         = "DataflowJsonURL";
+    "modifiedBy"       = "DataflowModifiedBy";
+    "modifiedDateTime" = "DataflowModifiedDateTime";
+    "name"             = "DataflowName";
+    "objectId"         = "DataflowId";
+    "generation" = "DataflowGeneration"
+}
+
+$dataflowLineageRenameMap = @{
+    "datasetObjectId"   = "DatasetId";
+    "dataflowObjectId"  = "DataflowId";
+    "workspaceObjectId" = "WorkspaceId"
 }
 
 $reportRenameMap = @{
@@ -275,12 +310,17 @@ elseif ($SpecificWorkspaceID1 -and $SpecificWorkspaceID2 -and
 # Initialize collections for all necessary information
 $datasetsInfo = @()
 $datasetSourcesInfo = @()
+$dataflowsInfo = @()
+$dataflowLineage = @()
+$dataflowSourcesInfo = @()
 $reportsInfo = @()
 $reportPagesInfo = @()
 $appsInfo = @()
 $reportsInAppInfo = @()
 $datasetNameLookup = @{}
+$dataflowNameLookup = @{}
 $datasetRefreshHistory = @()
+$dataflowRefreshHistory = @()
 
 # Loop through filtered workspaces
 foreach ($workspace in $workspacesInfo) {
@@ -302,13 +342,13 @@ foreach ($workspace in $workspacesInfo) {
         $datasources = Invoke-PowerBIRestMethod -Method GET -Url $datasourcesUrl | ConvertFrom-Json
 
         foreach ($datasource in $datasources.value) {
-            $renamedDatasource = Rename-Properties -object $datasource -renameMap $datasourceRenameMap
+            $renamedDatasource = Rename-Properties -object $datasource -renameMap $datasetDatasourceRenameMap
             $renamedDatasource | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $workspace.WorkspaceId -Force
             $renamedDatasource | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $workspace.WorkspaceName -Force
             $renamedDatasource | Add-Member -NotePropertyName "DatasetId" -NotePropertyValue $dataset.id -Force
             $renamedDatasource | Add-Member -NotePropertyName "DatasetName" -NotePropertyValue $dataset.name -Force
             if ($datasource.connectionDetails) {
-                $renamedDatasource.DatasourceConnectionDetails = $datasource.connectionDetails | ConvertTo-Json -Compress
+                $renamedDatasource.DatasetDatasourceConnectionDetails = $datasource.connectionDetails | ConvertTo-Json -Compress
             }
             $datasetSourcesInfo += $renamedDatasource
         }
@@ -362,22 +402,21 @@ foreach ($app in $apps.value) {
         $appReports = Invoke-PowerBIRestMethod -Method GET -Url $appReportsUrl | ConvertFrom-Json
 
         foreach ($report in $appReports.value) {
-        $renamedAppReport = Rename-Properties -object $report -renameMap $appReportRenameMap
-        $renamedAppReport | Add-Member -NotePropertyName "AppId" -NotePropertyValue $app.id -Force
-        $renamedAppReport | Add-Member -NotePropertyName "AppName" -NotePropertyValue $app.name -Force
+            $renamedAppReport = Rename-Properties -object $report -renameMap $appReportRenameMap
+            $renamedAppReport | Add-Member -NotePropertyName "AppId" -NotePropertyValue $app.id -Force
+            $renamedAppReport | Add-Member -NotePropertyName "AppName" -NotePropertyValue $app.name -Force
             $reportsInAppInfo += $renamedAppReport
         }
     }
 }
 
-# Add refresh history for each dataset
+# Fetch Refresh History for Datasets
 foreach ($workspace in $workspacesInfo) {
     foreach ($dataset in $datasetsInfo | Where-Object { $_.WorkspaceId -eq $workspace.WorkspaceId }) {
         $refreshHistoryUrl = "https://api.powerbi.com/v1.0/myorg/groups/$($workspace.WorkspaceId)/datasets/$($dataset.DatasetId)/refreshes"
         $refreshHistoryResponse = Invoke-PowerBIRestMethod -Method GET -Url $refreshHistoryUrl | ConvertFrom-Json
 
         foreach ($refresh in $refreshHistoryResponse.value) {
-            # Rename properties based on the map and dynamically include dataset context
             $renamedRefreshRecord = Rename-Properties -object $refresh -renameMap $datasetRefreshRenameMap
             $renamedRefreshRecord | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $workspace.WorkspaceId -Force
             $renamedRefreshRecord | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $workspace.WorkspaceName -Force
@@ -387,106 +426,123 @@ foreach ($workspace in $workspacesInfo) {
             $datasetRefreshHistory += $renamedRefreshRecord
         }
     }
-}
+}  
 
 
+# Fetch Dataflows for Workspaces
+foreach ($workspace in $workspacesInfo) {
+    $dataflowsUrl = "https://api.powerbi.com/v1.0/myorg/groups/$($workspace.WorkspaceId)/dataflows"
+    $dataflowsResponse = Invoke-PowerBIRestMethod -Method GET -Url $dataflowsUrl | ConvertFrom-Json
 
-#### Start of 'My Workspace' detail extract ####
+    # Ensure response is not null before looping
+    if ($dataflowsResponse.value) {
+        foreach ($dataflow in $dataflowsResponse.value) {
+            $renamedDataflow = Rename-Properties -object $dataflow -renameMap $dataflowRenameMap
+            $renamedDataflow | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $workspace.WorkspaceId -Force
+            $renamedDataflow | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $workspace.WorkspaceName -Force
 
+            # Store DataflowId and DataflowName in a lookup table
+            if ($dataflow.objectId) {  
+                $dataflowNameLookup[$dataflow.objectId] = $dataflow.name  
+            }
 
+            $dataflowsInfo += $renamedDataflow
 
-# Define "My Workspace" constants
-$myWorkspaceId = "My Workspace"
-$myWorkspaceName = "My Workspace"
+            # Fetch Dataflow Datasources
+            $dataflowSourcesUrl = "https://api.powerbi.com/v1.0/myorg/groups/$($workspace.WorkspaceId)/dataflows/$($dataflow.objectId)/datasources"
+            $dataflowSourcesResponse = Invoke-PowerBIRestMethod -Method GET -Url $dataflowSourcesUrl | ConvertFrom-Json
 
-# Manually add "My Workspace" breakdown to workspacesInfo
-$myWorkspaceDetails = [PSCustomObject]@{
-    WorkspaceId                 = $myWorkspaceId
-    WorkspaceName               = $myWorkspaceName
-    WorkspaceType               = "Workspace"
-    WorkspaceIsReadOnly         = $false
-    WorkspaceIsOnDedicatedCapacity = $false
-}
-$workspacesInfo += $myWorkspaceDetails
+            # Ensure response is not null before looping
+            if ($dataflowSourcesResponse.value) {
+                foreach ($datasource in $dataflowSourcesResponse.value) {
+                    $renamedDataflowDatasource = Rename-Properties -object $datasource -renameMap $dataflowDatasourceRenameMap
 
-# Fetch datasets from "My Workspace"
-$myWorkspaceDatasetsUrl = "https://api.powerbi.com/v1.0/myorg/datasets"
-$myWorkspaceDatasets = Invoke-PowerBIRestMethod -Method GET -Url $myWorkspaceDatasetsUrl | ConvertFrom-Json
+                    # Ensure required fields are included
+                    $renamedDataflowDatasource | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $workspace.WorkspaceId -Force
+                    $renamedDataflowDatasource | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $workspace.WorkspaceName -Force
+                    $renamedDataflowDatasource | Add-Member -NotePropertyName "DataflowId" -NotePropertyValue $dataflow.objectId -Force
 
-foreach ($dataset in $myWorkspaceDatasets.value) {
-    $renamedDataset = Rename-Properties -object $dataset -renameMap $datasetRenameMap
-    $renamedDataset | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $myWorkspaceId -Force
-    $renamedDataset | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $myWorkspaceName -Force
+            		if ($datasource.connectionDetails) {
+               		 $renamedDataflowDatasource.DataflowDatasourceConnectionDetails = $datasource.connectionDetails | ConvertTo-Json -Compress
+            }
+                    
 
-    # Store the DatasetId and DatasetName in the lookup table
-    $datasetNameLookup[$dataset.id] = $dataset.name
-    $datasetsInfo += $renamedDataset
+                    if ($dataflowNameLookup.ContainsKey($dataflow.objectId)) {
+                        $renamedDataflowDatasource | Add-Member -NotePropertyName "DataflowName" -NotePropertyValue $dataflowNameLookup[$dataflow.objectId] -Force
+                    } else {
+                        $renamedDataflowDatasource | Add-Member -NotePropertyName "DataflowName" -NotePropertyValue "Unknown Dataflow" -Force
+                    }
 
-    # Fetch dataset sources
-    $datasourcesUrl = "https://api.powerbi.com/v1.0/myorg/datasets/$($dataset.id)/datasources"
-    $datasources = Invoke-PowerBIRestMethod -Method GET -Url $datasourcesUrl | ConvertFrom-Json
-
-    foreach ($datasource in $datasources.value) {
-        $renamedDatasource = Rename-Properties -object $datasource -renameMap $datasourceRenameMap
-        $renamedDatasource | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $myWorkspaceId -Force
-        $renamedDatasource | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $myWorkspaceName -Force
-        $renamedDatasource | Add-Member -NotePropertyName "DatasetId" -NotePropertyValue $dataset.id -Force
-        $renamedDatasource | Add-Member -NotePropertyName "DatasetName" -NotePropertyValue $dataset.name -Force
-        if ($datasource.connectionDetails) {
-            $renamedDatasource.DatasourceConnectionDetails = $datasource.connectionDetails | ConvertTo-Json -Compress
+                    # Store in collection
+                    $dataflowSourcesInfo += $renamedDataflowDatasource
+                }
+            }
         }
-        $datasetSourcesInfo += $renamedDatasource
+    }
+} 
+
+# Fetch Dataflow Lineage (Upstream Dataflows)
+foreach ($workspace in $workspacesInfo) {
+        $dataflowLineageUrl = "https://api.powerbi.com/v1.0/myorg/groups/$($workspace.WorkspaceId)/datasets/upstreamDataflows"
+        $dataflowLineageResponse = Invoke-PowerBIRestMethod -Method GET -Url $dataflowLineageUrl | ConvertFrom-Json
+
+        # Ensure response is not null before looping
+        if ($dataflowLineageResponse.value) {
+            foreach ($dataflow in $dataflowLineageResponse.value) {
+                $renamedDataflow = Rename-Properties -object $dataflow -renameMap $dataflowLineageRenameMap
+                $renamedDataflow | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $workspace.WorkspaceId -Force
+                $renamedDataflow | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $workspace.WorkspaceName -Force
+
+
+                $dataflowId = $dataflow.dataflowObjectId  
+                if ($dataflowId -and $dataflowNameLookup.ContainsKey($dataflowId)) {
+                    $renamedDataflow | Add-Member -NotePropertyName "DataflowName" -NotePropertyValue $dataflowNameLookup[$dataflowId] -Force
+                } else {
+                    $renamedDataflow | Add-Member -NotePropertyName "DataflowName" -NotePropertyValue "Unknown Dataflow" -Force
+                }
+
+            $datasetId = $dataflow.datasetObjectId  
+            if ($datasetId -and $datasetNameLookup.ContainsKey($datasetId)) {
+                $renamedDataflow | Add-Member -NotePropertyName "DatasetName" -NotePropertyValue $datasetNameLookup[$datasetId] -Force
+            } else {
+                $renamedDataflow | Add-Member -NotePropertyName "DatasetName" -NotePropertyValue "Unknown Dataset" -Force
+            }
+
+                $dataflowLineage += $renamedDataflow
+            }
+        }
+    }
+
+
+# Fetch Dataflow Refresh History
+foreach ($workspace in $workspacesInfo) {
+    foreach ($dataflow in $dataflowsInfo | Where-Object { $_.WorkspaceId -eq $workspace.WorkspaceId }) {
+        $refreshHistoryUrl = "https://api.powerbi.com/v1.0/myorg/groups/$($workspace.WorkspaceId)/dataflows/$($dataflow.DataflowId)/transactions"
+        $refreshHistoryResponse = Invoke-PowerBIRestMethod -Method GET -Url $refreshHistoryUrl | ConvertFrom-Json
+
+        # Ensure response is not null before looping
+        if ($refreshHistoryResponse.value) {
+            foreach ($refresh in $refreshHistoryResponse.value) {
+                $renamedRefreshRecord = Rename-Properties -object $refresh -renameMap $dataflowRefreshRenameMap
+                $renamedRefreshRecord | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $workspace.WorkspaceId -Force
+                $renamedRefreshRecord | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $workspace.WorkspaceName -Force
+                $renamedRefreshRecord | Add-Member -NotePropertyName "DataflowId" -NotePropertyValue $dataflow.DataflowId -Force
+                
+
+                if ($dataflowNameLookup.ContainsKey($dataflow.DataflowId)) {
+                    $renamedRefreshRecord | Add-Member -NotePropertyName "DataflowName" -NotePropertyValue $dataflowNameLookup[$dataflow.DataflowId] -Force
+                } else {
+                    $renamedRefreshRecord | Add-Member -NotePropertyName "DataflowName" -NotePropertyValue "Unknown Dataflow" -Force
+                }
+
+                # Store in collection
+                $dataflowRefreshHistory += $renamedRefreshRecord
+            }
+        }
     }
 }
 
-# Fetch reports from "My Workspace"
-$myWorkspaceReportsUrl = "https://api.powerbi.com/v1.0/myorg/reports"
-$myWorkspaceReports = Invoke-PowerBIRestMethod -Method GET -Url $myWorkspaceReportsUrl | ConvertFrom-Json
 
-foreach ($report in $myWorkspaceReports.value) {
-    $renamedReport = Rename-Properties -object $report -renameMap $reportRenameMap
-    $renamedReport | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $myWorkspaceId -Force
-    $renamedReport | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $myWorkspaceName -Force
-
-    # Retrieve and add the correct DatasetName from the lookup table if DatasetId exists
-    $datasetId = $report.datasetId
-    if ($datasetId -and $datasetNameLookup.ContainsKey($datasetId)) {
-        $renamedReport | Add-Member -NotePropertyName "DatasetName" -NotePropertyValue $datasetNameLookup[$datasetId] -Force
-    } else {
-        $renamedReport | Add-Member -NotePropertyName "DatasetName" -NotePropertyValue "Unknown Dataset" -Force
-    }
-
-    $reportsInfo += $renamedReport
-
-    # Fetch report pages
-    $pagesUrl = "https://api.powerbi.com/v1.0/myorg/reports/$($report.id)/pages"
-    $pages = Invoke-PowerBIRestMethod -Method GET -Url $pagesUrl | ConvertFrom-Json
-    foreach ($page in $pages.value) {
-        $renamedPage = Rename-Properties -object $page -renameMap $pageRenameMap
-        $renamedPage | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $myWorkspaceId -Force
-        $renamedPage | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $myWorkspaceName -Force
-        $renamedPage | Add-Member -NotePropertyName "ReportId" -NotePropertyValue $report.id -Force
-        $renamedPage | Add-Member -NotePropertyName "ReportName" -NotePropertyValue $report.name -Force
-        $reportPagesInfo += $renamedPage
-    }
-}
-
-# Add refresh history for each dataset in "My Workspace"
-foreach ($dataset in $datasetsInfo | Where-Object { $_.WorkspaceId -eq $myWorkspaceId }) {
-    $refreshHistoryUrl = "https://api.powerbi.com/v1.0/myorg/datasets/$($dataset.DatasetId)/refreshes"
-    $refreshHistoryResponse = Invoke-PowerBIRestMethod -Method GET -Url $refreshHistoryUrl | ConvertFrom-Json
-
-    foreach ($refresh in $refreshHistoryResponse.value) {
-        # Rename properties based on the map and dynamically include dataset context
-        $renamedRefreshRecord = Rename-Properties -object $refresh -renameMap $datasetRefreshRenameMap
-        $renamedRefreshRecord | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $myWorkspaceId -Force
-        $renamedRefreshRecord | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $myWorkspaceName -Force
-        $renamedRefreshRecord | Add-Member -NotePropertyName "DatasetId" -NotePropertyValue $dataset.DatasetId -Force
-        $renamedRefreshRecord | Add-Member -NotePropertyName "DatasetName" -NotePropertyValue $dataset.DatasetName -Force
-
-        $datasetRefreshHistory += $renamedRefreshRecord
-    }
-}
 
 # Export all collections to Excel
 if (Test-Path $excelFile) {
@@ -497,6 +553,10 @@ $workspacesInfo | Export-Excel -Path $excelFile -WorksheetName "Workspaces" -Aut
 $datasetsInfo | Export-Excel -Path $excelFile -WorksheetName "Datasets" -AutoSize -Append
 $datasetSourcesInfo | Export-Excel -Path $excelFile -WorksheetName "DatasetSourcesInfo" -AutoSize -Append
 $datasetRefreshHistory | Export-Excel -Path $excelFile -WorksheetName "DatasetRefreshHistory" -AutoSize -Append
+$dataflowsInfo | Export-Excel -Path $excelFile -WorksheetName "Dataflows" -AutoSize -Append
+$dataflowLineage | Export-Excel -Path $excelFile -WorksheetName "DataflowLineage" -AutoSize -Append
+$dataflowSourcesInfo | Export-Excel -Path $excelFile -WorksheetName "DataflowSourcesInfo" -AutoSize -Append
+$dataflowRefreshHistory | Export-Excel -Path $excelFile -WorksheetName "DataflowRefreshHistory" -AutoSize -Append
 $reportsInfo | Export-Excel -Path $excelFile -WorksheetName "Reports" -AutoSize -Append
 $reportPagesInfo | Export-Excel -Path $excelFile -WorksheetName "ReportPages" -AutoSize -Append
 $appsInfo | Export-Excel -Path $excelFile -WorksheetName "Apps" -AutoSize -Append
