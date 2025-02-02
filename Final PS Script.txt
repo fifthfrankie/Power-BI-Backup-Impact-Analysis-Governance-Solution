@@ -348,7 +348,7 @@ foreach ($workspace in $workspacesInfo) {
             $renamedDatasource | Add-Member -NotePropertyName "DatasetId" -NotePropertyValue $dataset.id -Force
             $renamedDatasource | Add-Member -NotePropertyName "DatasetName" -NotePropertyValue $dataset.name -Force
             if ($datasource.connectionDetails) {
-                $renamedDatasource.DatasourceConnectionDetails = $datasource.connectionDetails | ConvertTo-Json -Compress
+                $renamedDatasource.DatasetDatasourceConnectionDetails = $datasource.connectionDetails | ConvertTo-Json -Compress
             }
             $datasetSourcesInfo += $renamedDatasource
         }
@@ -550,9 +550,7 @@ foreach ($workspace in $workspacesInfo) {
 
 
 
-
 #### Start of 'My Workspace' detail extract ####
-
 
 
 
@@ -588,13 +586,13 @@ foreach ($dataset in $myWorkspaceDatasets.value) {
     $datasources = Invoke-PowerBIRestMethod -Method GET -Url $datasourcesUrl | ConvertFrom-Json
 
     foreach ($datasource in $datasources.value) {
-        $renamedDatasource = Rename-Properties -object $datasource -renameMap $datasetDatasourceRenameMap
+        $renamedDatasource = Rename-Properties -object $datasource -renameMap $datasourceRenameMap
         $renamedDatasource | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $myWorkspaceId -Force
         $renamedDatasource | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $myWorkspaceName -Force
         $renamedDatasource | Add-Member -NotePropertyName "DatasetId" -NotePropertyValue $dataset.id -Force
         $renamedDatasource | Add-Member -NotePropertyName "DatasetName" -NotePropertyValue $dataset.name -Force
         if ($datasource.connectionDetails) {
-            $renamedDatasource.DatasourceConnectionDetails = $datasource.connectionDetails | ConvertTo-Json -Compress
+            $renamedDatasource.DatasetDatasourceConnectionDetails = $datasource.connectionDetails | ConvertTo-Json -Compress
         }
         $datasetSourcesInfo += $renamedDatasource
     }
@@ -648,6 +646,7 @@ foreach ($dataset in $datasetsInfo | Where-Object { $_.WorkspaceId -eq $myWorksp
         $datasetRefreshHistory += $renamedRefreshRecord
     }
 }
+
 
 
 # Export all collections to Excel
