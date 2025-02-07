@@ -76,10 +76,20 @@ This provides a quick and automated way to identify where and how specific field
 
 ### 6. Model Refresh History Metadata Extract
 - Leverages Power BI REST API to gather all model refresh history (limited to the same history shown in the Service).
-- Exports the extracted metadata into the same structured excel workbook as the Power BI Environment Information Extract
+- Exports the extracted metadata into the same structured excel workbook as the Power BI Environment Detail Extract
 - You must have read permissions on the related model.
+
+### 7. Dataflow Connection Details Metadata Extract
+- Leverages Power BI REST API to gather all Dataflow connection details.
+- Exports the extracted metadata into the same structured excel workbook as the Power BI Environment Detail Extract
+- You must have read permissions on the related Dataflow.
+
+### 8. Dataflow Refresh History Metadata Extract
+- Leverages Power BI REST API to gather all Dataflow refresh history (limited to the same history shown in the Service).
+- Exports the extracted metadata into the same structured excel workbook as the Power BI Environment Detail Extract
+- You must have read permissions on the related Dataflow.
   
-### 7. Power BI Governance Model
+### 9. Power BI Governance Model
 - Combines extracts into a Semantic Model to allow easy exploring, impact analysis, and governance of all Power BI Reports, Models, and Dataflows across all Workspaces
 - Works for anyone who runs the script and has at least 1 model and report. Dataflow not required.
 - Public example (limited due to no filter pane): https://app.powerbi.com/view?r=eyJrIjoiNmMxYWQ2ZTItZDM4ZS00MGM1LTlhMDQtN2I1OTMwMzI0OTg2IiwidCI6ImUyY2Y4N2QyLTYxMjktNGExYS1iZTczLTEzOGQyY2Y5OGJlMiJ9
