@@ -678,6 +678,28 @@ if (-not (Test-Path -Path $tempExtractFolder)) {
 }
 
 
+# Define the report backups path
+$reportBackupsPath = Join-Path -Path $baseFolderPath -ChildPath "Report Backups"
+
+# Ensure base and backup folders exist
+@($baseFolderPath, $reportBackupsPath) | ForEach-Object {
+    if (-not (Test-Path -Path $_)) {
+        New-Item -Path $_ -ItemType Directory -Force
+    }
+}
+
+# Create a new sub-folder for the date
+$newDateFolder = Join-Path -Path $reportBackupsPath -ChildPath $date
+if (-not (Test-Path -Path $newDateFolder)) {
+    New-Item -Path $newDateFolder -ItemType Directory -Force
+}
+
+# Define and ensure the temp extraction folder exists
+$tempExtractFolder = "$baseFolderPath\Config\Temp"
+if (-not (Test-Path -Path $tempExtractFolder)) {
+    New-Item -Path $tempExtractFolder -ItemType Directory -Force
+}
+
 foreach ($workspace in $workspacesInfo) {
     $workspaceName = $workspace.WorkspaceName
     $workspaceId = $workspace.WorkspaceId
@@ -690,20 +712,24 @@ foreach ($workspace in $workspacesInfo) {
     # Fetch reports in the workspace
     $reports = Get-PowerBIReport -WorkspaceId $workspaceId
 
-    # Export each report in the workspace
     foreach ($report in $reports) {
         # Clean up report name
         $cleanReportName = $report.Name -replace '\[', '(' -replace '\]', ')'
         $cleanReportName = $cleanReportName -replace "[^a-zA-Z0-9\(\)&,.-]", " "
         $cleanReportName = $cleanReportName.TrimStart()
 
-        # Determine the file extension based on the report type
+        # Determine the file extension based on report type
         $fileExtension = if ($report.WebUrl -like "*/rdlreports/*") { "rdl" } else { "pbix" }
         $filename = "$cleanWorkspaceName ~ $cleanReportName.$fileExtension"
         $filepath = Join-Path -Path $newDateFolder -ChildPath $filename
-        $extractFolder = Join-Path -Path $tempExtractFolder -ChildPath "$cleanWorkspaceName ~ $cleanReportName"
+        $extractSubFolder = "$cleanWorkspaceName ~ $cleanReportName"
 
-        # Check if the file exists and remove it if it does
+        # Ensure the temp extract folder exists
+        if (-not (Test-Path $tempExtractFolder)) {
+            New-Item -Path $tempExtractFolder -ItemType Directory -Force
+        }
+
+        # Remove old file if exists
         if (Test-Path $filepath) {
             Remove-Item $filepath -Force
         }
@@ -711,53 +737,57 @@ foreach ($workspace in $workspacesInfo) {
         Write-Output "Exporting $cleanWorkspaceName ~ $cleanReportName"
         Export-PowerBIReport -Id $report.Id -OutFile $filepath
 
-        # Only process model extraction if the Workspace is not Premium or Fabric Capacity (i.e. only Pro Workspaces)
-
+        # Process model extraction only if the workspace is NOT Premium/Fabric Capacity
         if ($workspace.WorkspaceIsOnDedicatedCapacity -eq $false) {
-            # Extract the pbix file
-            Write-Output "Extracting $cleanWorkspaceName ~ $cleanReportName"
-            pbi-tools extract $filepath -extractFolder $extractFolder -modelSerialization Raw
-
-            # Define a different drive letter to use (e.g., Q:)
             $driveLetter = "Q:"
-            $quotedExtractFolder = "`"$extractFolder`""
 
             # Ensure the drive letter is not already mapped
-            if (Test-Path $driveLetter) {
+            if (Get-PSDrive -Name Q -ErrorAction SilentlyContinue) {
                 subst $driveLetter /D
             }
 
-            # Log the command for debugging
-            $substCommand = "subst $driveLetter $quotedExtractFolder"
+            # Map Q: to the temp extract folder
+            $substCommand = "subst $driveLetter `"$tempExtractFolder`""
             Write-Output "Running command: $substCommand"
-
-            # Execute the subst command directly
             cmd.exe /c $substCommand
 
-            # Confirm mapping success
+            # Verify mapping success
             if (-not (Test-Path $driveLetter)) {
-                Write-Error "Failed to map $extractFolder to $driveLetter"
+                Write-Error "Failed to map $tempExtractFolder to $driveLetter"
                 continue
             }
 
-            # Generate the .bim file using the mapped drive
-            Write-Output "Generating .bim for $cleanWorkspaceName ~ $cleanReportName using $driveLetter"
-            pbi-tools generate-bim $driveLetter -transforms RemovePBIDataSourceVersion
+            # Define the extraction folder inside Q:
+            $extractFolder = "$driveLetter\$extractSubFolder"
 
-            # Rename and move the generated .bim files
-            $bimFilesGenerated = Get-ChildItem -Path $extractFolder -Filter *.bim
-            foreach ($bimFile in $bimFilesGenerated) {
-                $newBimName = "$cleanWorkspaceName ~ $cleanReportName.bim"
-                $newBimPath = Join-Path -Path $tempExtractFolder -ChildPath $newBimName
-
-                # Rename and move the .bim file
-                Move-Item -Path $bimFile.FullName -Destination $newBimPath -Force
-                Write-Output "Moved .bim file to $newBimPath"
+            # Ensure subfolder exists in Q:
+            if (-not (Test-Path $extractFolder)) {
+                New-Item -Path $extractFolder -ItemType Directory -Force
             }
 
-            # Cleanup: Unmap the drive
+            # Extract the PBIX file directly into Q:
+            Write-Output "Extracting $cleanWorkspaceName ~ $cleanReportName into $extractFolder"
+            pbi-tools extract $filepath -extractFolder $extractFolder -modelSerialization Raw
+
+            # Generate the .bim file using the mapped drive
+            Write-Output "Generating .bim for $cleanWorkspaceName ~ $cleanReportName using $extractFolder"
+            pbi-tools generate-bim $extractFolder -transforms RemovePBIDataSourceVersion
+
+            # Move generated .bim files
+            $bimFilesGenerated = Get-ChildItem -Path $extractFolder -Filter *.bim
+            if ($bimFilesGenerated) {
+                foreach ($bimFile in $bimFilesGenerated) {
+                    $newBimName = "$cleanWorkspaceName ~ $cleanReportName.bim"
+                    $newBimPath = Join-Path -Path $newDateFolder -ChildPath $newBimName
+
+                    Move-Item -Path $bimFile.FullName -Destination $newBimPath -Force
+                    Write-Output "Moved .bim file to $newBimPath"
+                }
+            }
+
+            # Cleanup: Unmap Q: and remove extract folder
             subst $driveLetter /D
-        } else {
+            Remove-Item -Path $extractFolder -Recurse -Force
         }
     }
 
@@ -766,10 +796,14 @@ foreach ($workspace in $workspacesInfo) {
 
 # Move .bim files to the report backups path and clean up temp folder
 $bimFiles = Get-ChildItem -Path $tempExtractFolder -Recurse -Filter *.bim
-foreach ($bimFile in $bimFiles) {
-    $destinationPath = Join-Path -Path $newDateFolder -ChildPath $bimFile.Name
-    Move-Item -Path $bimFile.FullName -Destination $folderPath -Force
+if ($bimFiles) {
+    foreach ($bimFile in $bimFiles) {
+        $destinationPath = Join-Path -Path $newDateFolder -ChildPath $bimFile.Name
+        Move-Item -Path $bimFile.FullName -Destination $folderPath -Force
+    }
 }
+
+# Cleanup temporary folders
 
 $tempDestinationRemovalPath = "$baseFolderPath\Config"
 
