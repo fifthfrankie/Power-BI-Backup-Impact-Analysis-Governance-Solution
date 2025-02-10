@@ -358,6 +358,9 @@ foreach ($workspace in $workspacesInfo) {
     $reportsUrl = "https://api.powerbi.com/v1.0/myorg/groups/$($workspace.WorkspaceId)/reports"
     $reports = Invoke-PowerBIRestMethod -Method GET -Url $reportsUrl | ConvertFrom-Json
 
+	# Create a hash set to store App Report IDs
+	$reportIds = @{}
+
     foreach ($report in $reports.value) {
         $renamedReport = Rename-Properties -object $report -renameMap $reportRenameMap
         $renamedReport | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $workspace.WorkspaceId -Force
@@ -384,6 +387,9 @@ foreach ($workspace in $workspacesInfo) {
             $renamedPage | Add-Member -NotePropertyName "ReportId" -NotePropertyValue $report.id -Force
             $renamedPage | Add-Member -NotePropertyName "ReportName" -NotePropertyValue $report.name -Force
             $reportPagesInfo += $renamedPage
+
+            # Store the report ID in the hash set
+            $reportIds[$report.id] = $true
         }
     }
 }
@@ -391,6 +397,9 @@ foreach ($workspace in $workspacesInfo) {
 # Fetch Apps and App Reports that are in filtered workspaces
 $appsUrl = "https://api.powerbi.com/v1.0/myorg/apps"
 $apps = Invoke-PowerBIRestMethod -Method GET -Url $appsUrl | ConvertFrom-Json
+
+# Create a hash set to store App Report IDs
+$appReportIds = @{}
 
 foreach ($app in $apps.value) {
     if ($workspacesInfo.WorkspaceId -contains $app.workspaceId) {
@@ -406,9 +415,13 @@ foreach ($app in $apps.value) {
             $renamedAppReport | Add-Member -NotePropertyName "AppId" -NotePropertyValue $app.id -Force
             $renamedAppReport | Add-Member -NotePropertyName "AppName" -NotePropertyValue $app.name -Force
             $reportsInAppInfo += $renamedAppReport
+
+            # Store the app report ID in the hash set
+            $appReportIds[$report.id] = $true
         }
     }
 }
+
 
 # Fetch Refresh History for Datasets
 foreach ($workspace in $workspacesInfo) {
@@ -542,6 +555,147 @@ foreach ($workspace in $workspacesInfo) {
     }
 }
 
+
+
+
+
+
+
+
+
+#### Start of 'My Workspace' detail extract ####
+
+
+# Define "My Workspace" constants
+$myWorkspaceId = "My Workspace"
+$myWorkspaceName = "My Workspace"
+
+# Manually add "My Workspace" breakdown to workspacesInfo
+$myWorkspaceDetails = [PSCustomObject]@{
+    WorkspaceId                 = $myWorkspaceId
+    WorkspaceName               = $myWorkspaceName
+    WorkspaceType               = "Workspace"
+    WorkspaceIsReadOnly         = $false
+    WorkspaceIsOnDedicatedCapacity = $false
+}
+$workspacesInfo += $myWorkspaceDetails
+
+# Fetch datasets from "My Workspace"
+$myWorkspaceDatasetsUrl = "https://api.powerbi.com/v1.0/myorg/datasets"
+$myWorkspaceDatasets = Invoke-PowerBIRestMethod -Method GET -Url $myWorkspaceDatasetsUrl | ConvertFrom-Json
+
+foreach ($dataset in $myWorkspaceDatasets.value) {
+    $renamedDataset = Rename-Properties -object $dataset -renameMap $datasetRenameMap
+    $renamedDataset | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $myWorkspaceId -Force
+    $renamedDataset | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $myWorkspaceName -Force
+
+    # Store the DatasetId and DatasetName in the lookup table
+    $datasetNameLookup[$dataset.id] = $dataset.name
+    $datasetsInfo += $renamedDataset
+
+    # Fetch dataset sources
+    $datasourcesUrl = "https://api.powerbi.com/v1.0/myorg/datasets/$($dataset.id)/datasources"
+    $datasources = Invoke-PowerBIRestMethod -Method GET -Url $datasourcesUrl | ConvertFrom-Json
+
+    foreach ($datasource in $datasources.value) {
+        $renamedDatasource = Rename-Properties -object $datasource -renameMap $datasetDatasourceRenameMap
+        $renamedDatasource | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $myWorkspaceId -Force
+        $renamedDatasource | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $myWorkspaceName -Force
+        $renamedDatasource | Add-Member -NotePropertyName "DatasetId" -NotePropertyValue $dataset.id -Force
+        $renamedDatasource | Add-Member -NotePropertyName "DatasetName" -NotePropertyValue $dataset.name -Force
+        if ($datasource.connectionDetails) {
+            $renamedDatasource.DatasetDatasourceConnectionDetails = $datasource.connectionDetails | ConvertTo-Json -Compress
+        }
+        $datasetSourcesInfo += $renamedDatasource
+    }
+}
+
+# Fetch reports from "My Workspace"
+$myWorkspaceReportsUrl = "https://api.powerbi.com/v1.0/myorg/reports"
+$myWorkspaceReports = Invoke-PowerBIRestMethod -Method GET -Url $myWorkspaceReportsUrl | ConvertFrom-Json
+
+# Flag to track if any shared report exists
+$sharedReportExists = $false
+
+foreach ($report in $myWorkspaceReports.value) {
+    # Skip reports that exist in either the Report list or the App Report list
+    if ($appReportIds.ContainsKey($report.id) -or $reportIds.ContainsKey($report.id)) {
+        continue
+    }
+
+    # Check if the report is owned by me
+    if ($report.isOwnedByMe -eq $false) {
+        $workspaceIdValue = "Shared Reports (No Workspace Access)"
+        $workspaceNameValue = "Shared Reports (No Workspace Access)"
+        $sharedReportExists = $true  # Set flag if a shared report is found
+    } else {
+        $workspaceIdValue = $myWorkspaceId
+        $workspaceNameValue = $myWorkspaceName
+    }
+
+    $renamedReport = Rename-Properties -object $report -renameMap $reportRenameMap
+    $renamedReport | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $workspaceIdValue -Force
+    $renamedReport | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $workspaceNameValue -Force
+
+    # Retrieve and add the correct DatasetName from the lookup table if DatasetId exists
+    $datasetId = $report.datasetId
+    if ($datasetId -and $datasetNameLookup.ContainsKey($datasetId)) {
+        $renamedReport | Add-Member -NotePropertyName "DatasetName" -NotePropertyValue $datasetNameLookup[$datasetId] -Force
+    } else {
+        $renamedReport | Add-Member -NotePropertyName "DatasetName" -NotePropertyValue "Unknown Dataset" -Force
+    }
+
+    $reportsInfo += $renamedReport
+
+    # Fetch report pages
+    $pagesUrl = "https://api.powerbi.com/v1.0/myorg/reports/$($report.id)/pages"
+    $pages = Invoke-PowerBIRestMethod -Method GET -Url $pagesUrl | ConvertFrom-Json
+    foreach ($page in $pages.value) {
+        $renamedPage = Rename-Properties -object $page -renameMap $pageRenameMap
+        $renamedPage | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $workspaceIdValue -Force
+        $renamedPage | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $workspaceNameValue -Force
+        $renamedPage | Add-Member -NotePropertyName "ReportId" -NotePropertyValue $report.id -Force
+        $renamedPage | Add-Member -NotePropertyName "ReportName" -NotePropertyValue $report.name -Force
+        $reportPagesInfo += $renamedPage
+    }
+}
+
+# After processing all reports, add a single row to workspacesInfo if at least one shared report exists
+
+if ($sharedReportExists) {
+    # Define "Shared Reports (My Workspace)" constants
+    $sharedWorkspaceId = "Shared Reports (No Workspace Access)"
+    $sharedWorkspaceName = "Shared Reports (No Workspace Access)"
+
+    # Add one entry to workspacesInfo for all shared reports
+    $sharedWorkspaceDetails = [PSCustomObject]@{
+        WorkspaceId                 = $sharedWorkspaceId
+        WorkspaceName               = $sharedWorkspaceName
+        WorkspaceType               = "Workspace"
+        WorkspaceIsReadOnly         = $false
+        WorkspaceIsOnDedicatedCapacity = $false
+    }
+    $workspacesInfo += $sharedWorkspaceDetails
+}
+
+
+
+# Add refresh history for each dataset in "My Workspace"
+foreach ($dataset in $datasetsInfo | Where-Object { $_.WorkspaceId -eq $myWorkspaceId }) {
+    $refreshHistoryUrl = "https://api.powerbi.com/v1.0/myorg/datasets/$($dataset.DatasetId)/refreshes"
+    $refreshHistoryResponse = Invoke-PowerBIRestMethod -Method GET -Url $refreshHistoryUrl | ConvertFrom-Json
+
+    foreach ($refresh in $refreshHistoryResponse.value) {
+        # Rename properties based on the map and dynamically include dataset context
+        $renamedRefreshRecord = Rename-Properties -object $refresh -renameMap $datasetRefreshRenameMap
+        $renamedRefreshRecord | Add-Member -NotePropertyName "WorkspaceId" -NotePropertyValue $myWorkspaceId -Force
+        $renamedRefreshRecord | Add-Member -NotePropertyName "WorkspaceName" -NotePropertyValue $myWorkspaceName -Force
+        $renamedRefreshRecord | Add-Member -NotePropertyName "DatasetId" -NotePropertyValue $dataset.DatasetId -Force
+        $renamedRefreshRecord | Add-Member -NotePropertyName "DatasetName" -NotePropertyValue $dataset.DatasetName -Force
+
+        $datasetRefreshHistory += $renamedRefreshRecord
+	    }
+	}
 
 
 # Export all collections to Excel
@@ -678,28 +832,6 @@ if (-not (Test-Path -Path $tempExtractFolder)) {
 }
 
 
-# Define the report backups path
-$reportBackupsPath = Join-Path -Path $baseFolderPath -ChildPath "Report Backups"
-
-# Ensure base and backup folders exist
-@($baseFolderPath, $reportBackupsPath) | ForEach-Object {
-    if (-not (Test-Path -Path $_)) {
-        New-Item -Path $_ -ItemType Directory -Force
-    }
-}
-
-# Create a new sub-folder for the date
-$newDateFolder = Join-Path -Path $reportBackupsPath -ChildPath $date
-if (-not (Test-Path -Path $newDateFolder)) {
-    New-Item -Path $newDateFolder -ItemType Directory -Force
-}
-
-# Define and ensure the temp extraction folder exists
-$tempExtractFolder = "$baseFolderPath\Config\Temp"
-if (-not (Test-Path -Path $tempExtractFolder)) {
-    New-Item -Path $tempExtractFolder -ItemType Directory -Force
-}
-
 foreach ($workspace in $workspacesInfo) {
     $workspaceName = $workspace.WorkspaceName
     $workspaceId = $workspace.WorkspaceId
@@ -712,24 +844,20 @@ foreach ($workspace in $workspacesInfo) {
     # Fetch reports in the workspace
     $reports = Get-PowerBIReport -WorkspaceId $workspaceId
 
+    # Export each report in the workspace
     foreach ($report in $reports) {
         # Clean up report name
         $cleanReportName = $report.Name -replace '\[', '(' -replace '\]', ')'
         $cleanReportName = $cleanReportName -replace "[^a-zA-Z0-9\(\)&,.-]", " "
         $cleanReportName = $cleanReportName.TrimStart()
 
-        # Determine the file extension based on report type
+        # Determine the file extension based on the report type
         $fileExtension = if ($report.WebUrl -like "*/rdlreports/*") { "rdl" } else { "pbix" }
         $filename = "$cleanWorkspaceName ~ $cleanReportName.$fileExtension"
         $filepath = Join-Path -Path $newDateFolder -ChildPath $filename
-        $extractSubFolder = "$cleanWorkspaceName ~ $cleanReportName"
+        $extractFolder = Join-Path -Path $tempExtractFolder -ChildPath "$cleanWorkspaceName ~ $cleanReportName"
 
-        # Ensure the temp extract folder exists
-        if (-not (Test-Path $tempExtractFolder)) {
-            New-Item -Path $tempExtractFolder -ItemType Directory -Force
-        }
-
-        # Remove old file if exists
+        # Check if the file exists and remove it if it does
         if (Test-Path $filepath) {
             Remove-Item $filepath -Force
         }
@@ -737,57 +865,53 @@ foreach ($workspace in $workspacesInfo) {
         Write-Output "Exporting $cleanWorkspaceName ~ $cleanReportName"
         Export-PowerBIReport -Id $report.Id -OutFile $filepath
 
-        # Process model extraction only if the workspace is NOT Premium/Fabric Capacity
+        # Only process model extraction if the Workspace is not Premium or Fabric Capacity (i.e. only Pro Workspaces)
+
         if ($workspace.WorkspaceIsOnDedicatedCapacity -eq $false) {
+            # Extract the pbix file
+            Write-Output "Extracting $cleanWorkspaceName ~ $cleanReportName"
+            pbi-tools extract $filepath -extractFolder $extractFolder -modelSerialization Raw
+
+            # Define a different drive letter to use (e.g., Q:)
             $driveLetter = "Q:"
+            $quotedExtractFolder = "`"$extractFolder`""
 
             # Ensure the drive letter is not already mapped
-            if (Get-PSDrive -Name Q -ErrorAction SilentlyContinue) {
+            if (Test-Path $driveLetter) {
                 subst $driveLetter /D
             }
 
-            # Map Q: to the temp extract folder
-            $substCommand = "subst $driveLetter `"$tempExtractFolder`""
+            # Log the command for debugging
+            $substCommand = "subst $driveLetter $quotedExtractFolder"
             Write-Output "Running command: $substCommand"
+
+            # Execute the subst command directly
             cmd.exe /c $substCommand
 
-            # Verify mapping success
+            # Confirm mapping success
             if (-not (Test-Path $driveLetter)) {
-                Write-Error "Failed to map $tempExtractFolder to $driveLetter"
+                Write-Error "Failed to map $extractFolder to $driveLetter"
                 continue
             }
 
-            # Define the extraction folder inside Q:
-            $extractFolder = "$driveLetter\$extractSubFolder"
-
-            # Ensure subfolder exists in Q:
-            if (-not (Test-Path $extractFolder)) {
-                New-Item -Path $extractFolder -ItemType Directory -Force
-            }
-
-            # Extract the PBIX file directly into Q:
-            Write-Output "Extracting $cleanWorkspaceName ~ $cleanReportName into $extractFolder"
-            pbi-tools extract $filepath -extractFolder $extractFolder -modelSerialization Raw
-
             # Generate the .bim file using the mapped drive
-            Write-Output "Generating .bim for $cleanWorkspaceName ~ $cleanReportName using $extractFolder"
-            pbi-tools generate-bim $extractFolder -transforms RemovePBIDataSourceVersion
+            Write-Output "Generating .bim for $cleanWorkspaceName ~ $cleanReportName using $driveLetter"
+            pbi-tools generate-bim $driveLetter -transforms RemovePBIDataSourceVersion
 
-            # Move generated .bim files
+            # Rename and move the generated .bim files
             $bimFilesGenerated = Get-ChildItem -Path $extractFolder -Filter *.bim
-            if ($bimFilesGenerated) {
-                foreach ($bimFile in $bimFilesGenerated) {
-                    $newBimName = "$cleanWorkspaceName ~ $cleanReportName.bim"
-                    $newBimPath = Join-Path -Path $newDateFolder -ChildPath $newBimName
+            foreach ($bimFile in $bimFilesGenerated) {
+                $newBimName = "$cleanWorkspaceName ~ $cleanReportName.bim"
+                $newBimPath = Join-Path -Path $tempExtractFolder -ChildPath $newBimName
 
-                    Move-Item -Path $bimFile.FullName -Destination $newBimPath -Force
-                    Write-Output "Moved .bim file to $newBimPath"
-                }
+                # Rename and move the .bim file
+                Move-Item -Path $bimFile.FullName -Destination $newBimPath -Force
+                Write-Output "Moved .bim file to $newBimPath"
             }
 
-            # Cleanup: Unmap Q: and remove extract folder
+            # Cleanup: Unmap the drive
             subst $driveLetter /D
-            Remove-Item -Path $extractFolder -Recurse -Force
+        } else {
         }
     }
 
@@ -796,14 +920,10 @@ foreach ($workspace in $workspacesInfo) {
 
 # Move .bim files to the report backups path and clean up temp folder
 $bimFiles = Get-ChildItem -Path $tempExtractFolder -Recurse -Filter *.bim
-if ($bimFiles) {
-    foreach ($bimFile in $bimFiles) {
-        $destinationPath = Join-Path -Path $newDateFolder -ChildPath $bimFile.Name
-        Move-Item -Path $bimFile.FullName -Destination $folderPath -Force
-    }
+foreach ($bimFile in $bimFiles) {
+    $destinationPath = Join-Path -Path $newDateFolder -ChildPath $bimFile.Name
+    Move-Item -Path $bimFile.FullName -Destination $folderPath -Force
 }
-
-# Cleanup temporary folders
 
 $tempDestinationRemovalPath = "$baseFolderPath\Config"
 
