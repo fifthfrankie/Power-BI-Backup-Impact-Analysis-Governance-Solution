@@ -358,7 +358,7 @@ foreach ($workspace in $workspacesInfo) {
     $reportsUrl = "https://api.powerbi.com/v1.0/myorg/groups/$($workspace.WorkspaceId)/reports"
     $reports = Invoke-PowerBIRestMethod -Method GET -Url $reportsUrl | ConvertFrom-Json
 
-	# Create a hash set to store App Report IDs
+	# Create a hash set to store Report IDs
 	$reportIds = @{}
 
     foreach ($report in $reports.value) {
@@ -400,6 +400,7 @@ $apps = Invoke-PowerBIRestMethod -Method GET -Url $appsUrl | ConvertFrom-Json
 
 # Create a hash set to store App Report IDs
 $appReportIds = @{}
+$originalReportObjectIds = @{}
 
 foreach ($app in $apps.value) {
     if ($workspacesInfo.WorkspaceId -contains $app.workspaceId) {
@@ -418,6 +419,7 @@ foreach ($app in $apps.value) {
 
             # Store the app report ID in the hash set
             $appReportIds[$report.id] = $true
+            $originalReportObjectIds[$report.originalReportObjectId] = $true
         }
     }
 }
@@ -619,7 +621,7 @@ $sharedReportExists = $false
 
 foreach ($report in $myWorkspaceReports.value) {
     # Skip reports that exist in either the Report list or the App Report list
-    if ($appReportIds.ContainsKey($report.id) -or $reportIds.ContainsKey($report.id)) {
+    if ($appReportIds.ContainsKey($report.id) -or $reportIds.ContainsKey($report.id) -or $originalReportObjectIds.ContainsKey($report.id)) {
         continue
     }
 
@@ -831,7 +833,6 @@ if (-not (Test-Path -Path $tempExtractFolder)) {
     New-Item -Path $tempExtractFolder -ItemType Directory -Force
 }
 
-
 foreach ($workspace in $workspacesInfo) {
     $workspaceName = $workspace.WorkspaceName
     $workspaceId = $workspace.WorkspaceId
@@ -841,13 +842,17 @@ foreach ($workspace in $workspacesInfo) {
     $cleanWorkspaceName = $cleanWorkspaceName -replace "[^a-zA-Z0-9\(\)&,.-]", " "
     $cleanWorkspaceName = $cleanWorkspaceName.TrimStart()
 
-    # Fetch reports in the workspace
-    $reports = Get-PowerBIReport -WorkspaceId $workspaceId
+    # Fetch reports from the existing list, NOT from Get-PowerBIReport
+    $reports = $reportsInfo | Where-Object { $_.WorkspaceId -eq $workspaceId }
 
     # Export each report in the workspace
     foreach ($report in $reports) {
+
+    $reportName = $report.ReportName
+    $reportId = $report.ReportId
+
         # Clean up report name
-        $cleanReportName = $report.Name -replace '\[', '(' -replace '\]', ')'
+        $cleanReportName = $reportName -replace '\[', '(' -replace '\]', ')'
         $cleanReportName = $cleanReportName -replace "[^a-zA-Z0-9\(\)&,.-]", " "
         $cleanReportName = $cleanReportName.TrimStart()
 
@@ -863,7 +868,7 @@ foreach ($workspace in $workspacesInfo) {
         }
 
         Write-Output "Exporting $cleanWorkspaceName ~ $cleanReportName"
-        Export-PowerBIReport -Id $report.Id -OutFile $filepath
+        Export-PowerBIReport -Id $reportId -OutFile $filepath
 
         # Only process model extraction if the Workspace is not Premium or Fabric Capacity (i.e. only Pro Workspaces)
 
