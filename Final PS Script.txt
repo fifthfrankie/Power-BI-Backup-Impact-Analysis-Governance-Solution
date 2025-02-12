@@ -567,6 +567,8 @@ foreach ($workspace in $workspacesInfo) {
 
 #### Start of 'My Workspace' detail extract ####
 
+# Check if either variable is filled out, if so, skip this section
+if (-not $SpecificWorkspaceID1 -and -not $SpecificWorkspaceID2) {
 
 # Define "My Workspace" constants
 $myWorkspaceId = "My Workspace"
@@ -698,6 +700,9 @@ foreach ($dataset in $datasetsInfo | Where-Object { $_.WorkspaceId -eq $myWorksp
         $datasetRefreshHistory += $renamedRefreshRecord
 	    }
 	}
+    } else {
+	Write-Host "Skipping 'My Workspace' processing because Specific Workspace ID is provided."
+}
 
 
 # Export all collections to Excel
