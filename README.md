@@ -1,4 +1,4 @@
-## This all-in-one solution is designed to be ran by anyone. 
+## This all-in-one solution is designed to be ran by ANYONE. 
 - Everything within the script is limited to your access within the Power BI environment.
 - All computer requirements are at the user level and do not require admin privileges.
 - There are ZERO pre-reqs. It's as simple as downloading this repo into C:\Power BI Backups, opening Powershell, and running the included 'Final PS Script'
