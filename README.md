@@ -1,6 +1,7 @@
 ## This all-in-one solution is designed to be ran by anyone. 
 - Everything within the script is limited to your access within the Power BI environment.
 - All computer requirements are at the user level and do not require admin privileges.
+- There are no pre-reqs. It is as simple as downloading the contents of this repo into C:\Power BI Backups and running the PS script
 
 # Power BI Governance & Impact Analysis Solution
 
