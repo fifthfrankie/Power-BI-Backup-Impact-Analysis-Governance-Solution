@@ -212,51 +212,54 @@ finally
 
 
 
-    string svName = string.Empty;
-    string dbName = string.Empty;
-    string datetoday = string.Empty;
-    string rptId = string.Empty;
-    string connType = string.Empty;
-    string connPath = unzipPath + @"\Connections";
-    if (File.Exists(connPath))
-    {        
-        string jsonconnFilePath = Path.ChangeExtension(connPath, ".json");
-        File.Move(connPath, jsonconnFilePath); 
+string svName = string.Empty;
+string dbName = string.Empty;
+string datetoday = string.Empty;
+string rptId = string.Empty;
+string connType = string.Empty;
+string connPath = unzipPath + @"\Connections";
 
-        string unformattedconnJson = File.ReadAllText(jsonconnFilePath,System.Text.Encoding.UTF8);
-        string formattedconnJson = Newtonsoft.Json.Linq.JToken.Parse(unformattedconnJson).ToString();
-        dynamic connjson = Newtonsoft.Json.Linq.JObject.Parse(formattedconnJson);
-        
-        // Connection info
-try
-{
-    foreach (var o in connjson["Connections"].Children())
+if (File.Exists(connPath))
+{        
+    string jsonconnFilePath = Path.ChangeExtension(connPath, ".json");
+    File.Move(connPath, jsonconnFilePath); 
+
+    string unformattedconnJson = File.ReadAllText(jsonconnFilePath, System.Text.Encoding.UTF8);
+    string formattedconnJson = Newtonsoft.Json.Linq.JToken.Parse(unformattedconnJson).ToString();
+    dynamic connjson = Newtonsoft.Json.Linq.JObject.Parse(formattedconnJson);
+    
+    // Connection info
+    try
     {
-        connType = (string)o["ConnectionType"];
-
-        // For specific connection types
-        if (connType == "pbiServiceLive" || connType == "pbiServiceXmlaStyleLive" || connType == "analysisServicesDatabaseLive")
+        foreach (var o in connjson["Connections"].Children())
         {
-            try
+            connType = (string)o["ConnectionType"];
+
+            // Extract DatasetId and ReportId for specific connection types
+            if (connType == "pbiServiceLive" || connType == "pbiServiceXmlaStyleLive" || connType == "analysisServicesDatabaseLive")
             {
-                dbName = (string)connjson["RemoteArtifacts"][0]["DatasetId"];
-                rptId = (string)connjson["RemoteArtifacts"][0]["ReportId"];
+                try
+                {
+                    dbName = (string)connjson["RemoteArtifacts"][0]["DatasetId"];
+                    rptId = (string)connjson["RemoteArtifacts"][0]["ReportId"];
+                }
+                catch
+                {
+                }
             }
-            catch
+            else
             {
-            }
-        }
-        else
-        {
-            // For other connection types
-            try
-            {
-                dbName = (string)o["PbiModelDatabaseName"];
-            }
-            catch
-            {
+                // For other connection types, try extracting database name directly
+                try
+                {
+                    dbName = (string)o["PbiModelDatabaseName"];
+                }
+                catch
+                {
+                }
             }
 
+            // Extract ServerName from ConnectionString for ALL connection types
             try
             {
                 string x = (string)o["ConnectionString"];
@@ -265,30 +268,32 @@ try
                 int dsCatchLen = dsCatch.Length;
                 int icCatchLen = icCatch.Length;
 
-                svName = x.Substring(x.IndexOf(dsCatch) + dsCatchLen, x.IndexOf(";") - x.IndexOf(dsCatch) - dsCatchLen);
-                dbName = x.Substring(x.IndexOf(icCatch) + icCatchLen);
+                if (x.Contains(dsCatch) && x.Contains(icCatch))
+                {
+                    svName = x.Substring(x.IndexOf(dsCatch) + dsCatchLen, x.IndexOf(";", x.IndexOf(dsCatch)) - x.IndexOf(dsCatch) - dsCatchLen);
+                }
             }
             catch
             {
             }
         }
     }
-}
-catch
-{
-    // Fallback for localPowerQuery
-    try
-    {
-        dbName = (string)connjson["RemoteArtifacts"][0]["DatasetId"];
-        rptId = (string)connjson["RemoteArtifacts"][0]["ReportId"];
-        connType = "localPowerQuery";
-    }
     catch
     {
+        // Fallback for localPowerQuery
+        try
+        {
+            dbName = (string)connjson["RemoteArtifacts"][0]["DatasetId"];
+            rptId = (string)connjson["RemoteArtifacts"][0]["ReportId"];
+            connType = "localPowerQuery";
+        }
+        catch
+        {
+        }
     }
+
+    Connections.Add(new Connection { ServerName = svName, DatabaseName = dbName, Type = connType, ReportID = rptId });        
 }
-        Connections.Add(new Connection {ServerName = svName, DatabaseName = dbName, Type = connType, ReportID = rptId});        
-    }
     
     //Delete previously created folder
     try
