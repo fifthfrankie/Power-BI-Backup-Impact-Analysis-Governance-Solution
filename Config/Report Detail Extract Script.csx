@@ -235,7 +235,7 @@ try
         connType = (string)o["ConnectionType"];
 
         // For specific connection types
-        if (connType == "pbiServiceLive" || connType == "pbiServiceXmlaStyleLive")
+        if (connType == "pbiServiceLive" || connType == "pbiServiceXmlaStyleLive" || connType == "analysisServicesDatabaseLive")
         {
             try
             {
