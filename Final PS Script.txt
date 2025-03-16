@@ -65,14 +65,10 @@ if ($existingPath -notlike "*$PBIToolsFolderPath*") {
     Write-Output "$PBIToolsFolderPath is already in the PATH environment variable."
 }
 
-# Check and set the execution policy
-$currentPolicy = Get-ExecutionPolicy -Scope CurrentUser
-if ($currentPolicy -eq 'Restricted' -or $currentPolicy -eq 'Undefined' -or $currentPolicy -eq 'AllSigned') {
-    Write-Host "Current execution policy is restrictive: $currentPolicy. Attempting to set to RemoteSigned."
-    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
-    Write-Host "Execution policy set to RemoteSigned."
-} else {
-    Write-Host "Current execution policy is sufficient: $currentPolicy."
+# Temporarily set execution policy to Bypass for this session
+if ((Get-ExecutionPolicy) -ne 'Bypass') {
+    Write-Host "Temporarily setting Execution Policy to Bypass for this session..."
+    Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 }
 
 # Ensure required modules are installed, and imports them. If import fails, error and exit early
@@ -84,6 +80,7 @@ foreach ($module in $requiredModules) {
 
     Import-Module $Module -ErrorAction 'stop' # In the rare case Install-Module fails, you probably want a terminating error
 }
+
 
 # Connect to the Power BI Service
 function Connect-PowerBI {
