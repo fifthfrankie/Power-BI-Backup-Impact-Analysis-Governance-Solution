@@ -191,9 +191,29 @@ finally
     
     File.Move(layoutPath, jsonFilePath); 
 
-    string unformattedJson = File.ReadAllText(jsonFilePath,System.Text.UnicodeEncoding.Unicode);
-    string formattedJson = Newtonsoft.Json.Linq.JToken.Parse(unformattedJson).ToString();
-    dynamic json = Newtonsoft.Json.Linq.JObject.Parse(formattedJson);
+    // Read JSON content safely
+string unformattedJson = string.Empty;
+try
+{
+    unformattedJson = File.ReadAllText(jsonFilePath, System.Text.UnicodeEncoding.Unicode);
+}
+catch (Exception)
+{
+    continue; // Ignore errors and move to next file
+}
+
+// Parse JSON safely
+string formattedJson = string.Empty;
+dynamic json = null;
+try
+{
+    formattedJson = Newtonsoft.Json.Linq.JToken.Parse(unformattedJson).ToString();
+    json = Newtonsoft.Json.Linq.JObject.Parse(formattedJson);
+}
+catch (Exception)
+{
+    continue; // Ignore errors and move to next file
+}
     
     
 
