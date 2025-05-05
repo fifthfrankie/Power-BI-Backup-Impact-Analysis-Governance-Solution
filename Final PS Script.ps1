@@ -6,7 +6,6 @@ $Script2Path = "$baseFolderPath\Config\Model Detail Extract Script.csx"
 $Script3Path = "$baseFolderPath\Config\Measure Dependency Extract Script.csx"
 $TabularEditor2Path = "$baseFolderPath\Config\TabularEditor\TabularEditor.exe"
 
-
 # Enter Workspace ID between quotation marks if you only want script to run in 1 or 2 workspaces. Leave BOTH empty if you want to loop through all.
 
 $SpecificWorkspaceID1 = ""  # Replace with your actual workspace ID or leave empty and the script will loop through every workspace
@@ -996,9 +995,24 @@ if ($latestDateFolder) {
     exit
 }
 
+# Function to clean worksheet and property names for Excel
+function Clean-ExcelName {
+    param (
+        [string]$name
+    )
+    # Remove invalid characters and trim
+    $cleanName = $name -replace '[^A-Za-z0-9_]', '_' # Only allow letters, numbers, underscore
+    if ([string]::IsNullOrWhiteSpace($cleanName)) {
+        $cleanName = 'Sheet1'
+    }
+    return $cleanName
+}
+
+# When exporting TXT files to Excel, Clean worksheet names
 foreach ($txtFile in (Get-ChildItem -Path $newDateFolder -Filter *.txt)) {
     # Get the base name of the file (without extension) for the worksheet name
     $worksheetName = [System.IO.Path]::GetFileNameWithoutExtension($txtFile.FullName)
+    $worksheetName = Clean-ExcelName $worksheetName
     
     # Import the TXT file, assuming it's tab-delimited
     $txtData = Get-Content -Path $txtFile.FullName -Encoding UTF8 | ConvertFrom-Csv -Delimiter "`t"
@@ -1503,4 +1517,4 @@ Stop-Job -Name "TokenRefreshJob"
 Remove-Job -Name "TokenRefreshJob"
 
 Write-Output "Excel files processed and combined successfully."
- 
+
